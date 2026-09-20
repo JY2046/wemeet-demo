@@ -241,3 +241,11 @@ button { min-height:44px; }
 .visual-alert { border-color:var(--coffee); background:#fff1e5; }
 .customer-reply { background:var(--sage); }
 @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration:.01ms!important; animation-iteration-count:1!important; scroll-behavior:auto!important; transition:none!important; } }
+
+/* Local real speech-to-text states */
+.big-mic.recording { color:#fff; background:#a94e46; border-color:#8e3934; animation:recordPulse 1.25s infinite; }
+.big-mic.processing { color:var(--sage); background:var(--sage-soft); border-color:var(--sage); cursor:wait; }
+.spinner { width:42px; height:42px; border:5px solid rgba(63,117,98,.2); border-top-color:var(--sage); border-radius:50%; animation:spin .8s linear infinite; }
+.asr-error { margin:0 0 16px; padding:13px 15px; border-radius:12px; color:#7c3733; background:#fae9e6; font-weight:700; }
+@keyframes spin { to { transform:rotate(360deg); } }
+@keyframes recordPulse { 50% { box-shadow:0 0 0 12px rgba(169,78,70,.14); } }
