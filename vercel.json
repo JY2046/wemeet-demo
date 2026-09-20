@@ -1,0 +1,15 @@
+{
+  "functions": {
+    "api/transcribe.py": {
+      "maxDuration": 60
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/transcribe",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    }
+  ]
+}
