@@ -29,7 +29,7 @@ const menu = [
 ];
 
 const state = {
-  screen:'home', communication:'点击卡片', category:'经典咖啡', editing:null, draft:null, cart:[], service:{pickup:'店内享用',urgency:'不着急',note:''}, partnerStep:0, reply:'', serviceIntent:'', serviceReply:'', freeInput:'', inputResult:false, recording:false, transcribing:false, asrError:'', recorder:null, stream:null, chunks:[], feedback:{clear:0,helpful:0,pressure:0,note:''}
+  screen:'home', communication:'点击卡片', category:'经典咖啡', editing:null, draft:null, cart:[], service:{pickup:'店内享用',urgency:'不着急',note:''}, partnerStep:0, reply:'', serviceIntent:'', serviceReply:'', freeInput:'', inputResult:false, recording:false, transcribing:false, asrError:'', parseError:'', recorder:null, stream:null, chunks:[], feedback:{clear:0,helpful:0,pressure:0,note:''}
 };
 
 const esc = (v='') => String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -58,7 +58,7 @@ function freeOrder(){
   const voiceControl=state.transcribing
     ? `<div class="big-mic processing"><span class="spinner"></span><strong>正在本机转写…</strong><small>正在将本次主动录制的短音频转换为中文字幕</small></div>`
     : `<button class="big-mic ${state.recording?'recording':''}" data-action="capture-voice">${state.recording?'⏹️':'🎙️'}<strong>${state.recording?'点击结束并转写':(state.freeInput?'重新录音':'开始录音')}</strong><small>${state.recording?'正在录音，请自然说出完整需求':'录音将安全发送至语音转写服务，不会持续监听'}</small></button>`;
-  return `<div class="page-head"><div><div class="eyebrow">${voice?'语音点单':'文字点单'} · 对话会变成视觉订单</div><h2>${voice?'直接说出你想喝的':'把你的需求打出来'}</h2><p class="lead">例如：我要两杯冰拿铁，少冰少糖，换燕麦奶，其中一杯加浓，打包，我比较赶时间。</p></div>${progress(2)}</div><div class="mode-switch"><button data-action="connect">切换表达方式</button><span>当前方式：${state.communication}</span></div><section class="panel free-order"><div class="conversation-preview"><div class="speaker customer"><small>顾客</small><p data-live-input="customer">${state.freeInput?esc(state.freeInput):'你的表达会出现在这里，并同步变成咖啡师可见的字幕。'}</p></div><div class="speaker barista"><small>咖啡师看到</small><p data-live-input="barista">${state.freeInput?esc(state.freeInput):'等待顾客表达……'}</p></div></div>${voice?`${voiceControl}${state.asrError?`<div class="asr-error">${esc(state.asrError)}</div>`:''}`:`<label class="field"><strong>输入点单或其他需求</strong><textarea data-free-input placeholder="例如：一杯冰拿铁，少冰，换燕麦奶……">${esc(state.freeInput)}</textarea></label>`}<button class="step-action" data-action="understand" ${state.freeInput&&!state.recording&&!state.transcribing?'':'disabled'}>AI 整理为订单，请双方确认</button><div class="example-chips"><span>备用体验文本：</span><button data-example="一杯冰拿铁，少冰少糖，换燕麦奶，加一份浓缩，打包，我想知道等多久">复杂点单</button><button data-example="我想要不含咖啡的热饮，不要太甜">描述偏好</button><button data-example="不好意思，我想把刚才那杯改成少冰">临时改单</button></div></section>`
+  return `<div class="page-head"><div><div class="eyebrow">${voice?'语音点单':'文字点单'} · 对话会变成视觉订单</div><h2>${voice?'直接说出你想喝的':'把你的需求打出来'}</h2><p class="lead">例如：我要两杯冰拿铁，少冰少糖，换燕麦奶，其中一杯加浓，打包，我比较赶时间。</p></div>${progress(2)}</div><div class="mode-switch"><button data-action="connect">切换表达方式</button><span>当前方式：${state.communication}</span></div><section class="panel free-order"><div class="conversation-preview"><div class="speaker customer"><small>顾客</small><p data-live-input="customer">${state.freeInput?esc(state.freeInput):'你的表达会出现在这里，并同步变成咖啡师可见的字幕。'}</p></div><div class="speaker barista"><small>咖啡师看到</small><p data-live-input="barista">${state.freeInput?esc(state.freeInput):'等待顾客表达……'}</p></div></div>${voice?`${voiceControl}${state.asrError?`<div class="asr-error">${esc(state.asrError)}</div>`:''}`:`<label class="field"><strong>输入点单或其他需求</strong><textarea data-free-input placeholder="例如：一杯冰拿铁，少冰，换燕麦奶……">${esc(state.freeInput)}</textarea></label>`}${state.parseError?`<div class="asr-error">${esc(state.parseError)}</div>`:''}<button class="step-action" data-action="understand" ${state.freeInput&&!state.recording&&!state.transcribing?'':'disabled'}>AI 整理为订单，请双方确认</button><div class="example-chips"><span>备用体验文本：</span><button data-example="一杯冰拿铁，少冰少糖，换燕麦奶，加一份浓缩，打包，我想知道等多久">复杂点单</button><button data-example="我想要不含咖啡的热饮，不要太甜">描述偏好</button><button data-example="不好意思，我想把刚才那杯改成少冰">临时改单</button></div></section>`
 }
 
 async function toggleRecording(){
@@ -99,7 +99,59 @@ async function toggleRecording(){
   }catch(error){state.asrError='无法使用麦克风，请允许浏览器访问麦克风后重试。';render()}
 }
 
-function parseFreeOrder(){const t=state.freeInput;let id=t.includes('抹茶')&&t.includes('不含咖啡')?'matcha-milk':t.includes('白桃')?'peach-tea':t.includes('美式')?'soe':'latte';const p=product(id);const item=makeDraft(p);if(p.temps.includes('冷')&&(t.includes('冰')||t.includes('冷')))item.temp='冷';if(t.includes('热')&&p.temps.includes('热'))item.temp='热';if(t.includes('少冰'))item.ice='少冰';else if(t.includes('去冰')||t.includes('不要冰'))item.ice='去冰';if(t.includes('少糖')||t.includes('不要太甜'))item.sugar='少糖';if(t.includes('不加糖'))item.sugar='不另外加糖';if(t.includes('燕麦'))item.milk='燕麦奶 +4';if(t.includes('厚椰'))item.milk='厚椰乳';if(t.includes('加浓')||t.includes('浓缩'))item.shots='加一份浓缩 +4';const m=t.match(/[两二2]杯/);if(m&&t.includes('其中一杯')&&item.shots==='加一份浓缩 +4'){const regular={...item,qty:1,shots:'标准浓度'};const extra={...item,qty:1};state.cart=[regular,extra]}else{if(m)item.qty=2;state.cart=[item]};if(t.includes('打包'))state.service.pickup='打包带走';if(t.includes('赶时间'))state.service.urgency='比较赶时间';else if(t.includes('等多久')||t.includes('等待'))state.service.urgency='想知道等待时间';state.inputResult=true;state.screen='confirm'}
+const productAliases = [
+  ['matcha-latte',['抹茶拿铁','抹茶咖啡']],
+  ['matcha-milk',['抹茶鲜奶','抹茶牛奶','不含咖啡的抹茶','无咖啡因抹茶']],
+  ['osmanthus',['桂花酒酿拿铁','桂花拿铁','酒酿拿铁']],
+  ['coconut-latte',['厚椰拿铁','椰乳拿铁']],
+  ['oat-latte',['燕麦拿铁','燕麦奶拿铁']],
+  ['taro-dirty',['香芋dirty','香芋 dirty','香芋迪提','香芋迪缇']],
+  ['elderberry',['接骨木气泡美式','接骨木美式']],
+  ['green-coconut',['青椰美式','椰青美式']],
+  ['grape',['黑葡萄美式','葡萄美式']],
+  ['salary',['升薪美式','生薪美式','经典美式']],
+  ['soe',['耶加雪菲soe美式','耶加雪菲美式','soe美式','手冲美式']],
+  ['salt-mocha',['咸摩卡','海盐摩卡']],
+  ['dirty',['dirty','迪提','迪缇']],
+  ['lemon',['柠香冰咖','柠檬冰咖']],
+  ['pomelo',['腌渍柚子樱花茶','柚子樱花茶','柚子茶']],
+  ['peach-tea',['白桃乌龙茶','白桃乌龙']],
+  ['brown-rose',['古法黑糖玫瑰茶','黑糖玫瑰茶','玫瑰茶']],
+  ['temper-peach',['脾气水蜜桃','水蜜桃气泡水','水蜜桃苏打']],
+  ['passion-plum',['百香话梅苏打','百香果话梅苏打','话梅苏打']],
+  ['strawberry',['草莓苏打','草莓气泡水']],
+  ['kiwi',['奇亚籽可颂','奇亚籽羊角']],
+  ['choco',['巧克力双色羊角','巧克力羊角','巧克力可颂']],
+  ['bbq',['叉烧可颂','叉烧羊角']],
+  ['butter',['招牌黄油可颂','黄油可颂','黄油羊角']],
+  ['latte',['拿铁']],
+  ['soe',['美式']]
+];
+function detectProduct(text){
+  const normalized=text.toLowerCase().replace(/[\s·，。,.！？!?]/g,'');
+  for(const [id,aliases] of productAliases){if(aliases.some(alias=>normalized.includes(alias.toLowerCase().replace(/\s/g,''))))return product(id)}
+  if(/不含咖啡|无咖啡因/.test(normalized))return null;
+  return null;
+}
+function parseFreeOrder(){
+  const t=state.freeInput.trim(),p=detectProduct(t);
+  state.parseError='';
+  if(!p){state.parseError='没有识别到菜单中的具体商品，请说出完整名称（例如“黑葡萄美式”或“白桃乌龙茶”），也可以切换到点击卡片选择。';render();return false}
+  const item=makeDraft(p);
+  if(!p.food&&p.temps.includes('冷')&&(t.includes('冰')||t.includes('冷')))item.temp='冷';
+  if(!p.food&&t.includes('热')&&p.temps.includes('热'))item.temp='热';
+  if(t.includes('少冰'))item.ice='少冰';else if(t.includes('去冰')||t.includes('不要冰'))item.ice='去冰';
+  if(t.includes('少糖')||t.includes('不要太甜'))item.sugar='少糖';
+  if(t.includes('不加糖')||t.includes('无糖')||t.includes('不要糖'))item.sugar='不另外加糖';
+  if(p.milk&&t.includes('燕麦')&&p.id!=='oat-latte')item.milk='燕麦奶 +4';
+  if(p.milk&&t.includes('厚椰')&&p.id!=='coconut-latte')item.milk='厚椰乳';
+  if(!p.food&&!p.noCoffee&&(t.includes('加浓')||t.includes('加一份浓缩')))item.shots='加一份浓缩 +4';
+  const m=t.match(/[两二2]杯/);
+  if(m&&t.includes('其中一杯')&&item.shots==='加一份浓缩 +4'){state.cart=[{...item,qty:1,shots:'标准浓度'},{...item,qty:1}]}else{if(m)item.qty=2;state.cart=[item]}
+  if(t.includes('打包')||t.includes('带走'))state.service.pickup='打包带走';
+  if(t.includes('赶时间')||t.includes('着急'))state.service.urgency='比较赶时间';else if(t.includes('等多久')||t.includes('等待'))state.service.urgency='想知道等待时间';
+  state.inputResult=true;state.screen='confirm';return true
+}
 
 function configure(){const p=product(state.draft.id),d=state.draft;const option=(key,title,arr)=>`<div class="option-group"><h3>${title}</h3><div class="option-row">${arr.map(x=>`<button class="option ${d[key]===x?'selected':''}" data-option="${key}:${x}">${x}</button>`).join('')}</div></div>`;return `<div class="page-head"><div><div class="eyebrow">配置商品</div><h2>${p.accent} ${p.name}</h2><p class="lead">${p.desc} · 基础价 ${money(p.price)}</p></div>${progress(2)}</div><div class="access-strip"><span>每个选择都会以大字和颜色变化显示给咖啡师</span><span>当前：${state.communication}</span></div><section class="panel config-panel">${p.food?'':`${option('temp','温度',p.temps)}${d.temp==='冷'&&p.id!=='dirty'&&p.id!=='taro-dirty'?option('ice','冰量',drinkOptions.ice):''}${option('sugar','甜度',drinkOptions.sugar)}${p.milk?option('milk','奶基底',drinkOptions.milk):''}${!p.noCoffee?option('shots','咖啡浓度',drinkOptions.shots):''}`}<div class="option-group"><h3>数量</h3><div class="quantity"><button data-qty="-1">−</button><strong>${d.qty}</strong><button data-qty="1">＋</button></div></div><label class="field"><strong>这杯的补充需求（选填）</strong><input data-item-note value="${esc(d.note)}" placeholder="例如：分开装、不要吸管" maxlength="40"></label><div class="action-row"><button class="primary" data-action="save-item">${state.editing===null?'加入订单':'保存修改'} · ${money(itemPrice(d))}</button><button class="ghost" data-action="order">返回菜单</button></div></section>`}
 
