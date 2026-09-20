@@ -29,7 +29,7 @@ const menu = [
 ];
 
 const state = {
-  screen:'home', communication:'点击卡片', category:'经典咖啡', editing:null, draft:null, cart:[], service:{pickup:'店内享用',urgency:'不着急',note:''}, partnerStep:0, reply:'', serviceIntent:'', serviceReply:'',freeInput:'',inputResult:false, freeInput:'', inputResult:false, feedback:{clear:0,helpful:0,pressure:0,note:''}
+  screen:'home', communication:'点击卡片', category:'经典咖啡', editing:null, draft:null, cart:[], service:{pickup:'店内享用',urgency:'不着急',note:''}, partnerStep:0, reply:'', serviceIntent:'', serviceReply:'', freeInput:'', inputResult:false, recording:false, transcribing:false, asrError:'', recorder:null, stream:null, chunks:[], feedback:{clear:0,helpful:0,pressure:0,note:''}
 };
 
 const esc = (v='') => String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -53,7 +53,51 @@ function order(){if(state.communication!=='点击卡片')return freeOrder();cons
 function cartBar(){if(!state.cart.length)return '';return `<button class="cart-bar" data-action="cart"><span><b>${state.cart.reduce((n,x)=>n+x.qty,0)}</b> 已选商品</span><strong>${money(total())} · 查看订单</strong></button>`}
 
 
-function freeOrder(){const voice=state.communication==='语音转文字';return `<div class="page-head"><div><div class="eyebrow">${voice?'语音点单':'文字点单'} · 对话会变成视觉订单</div><h2>${voice?'直接说出你想喝的':'把你的需求打出来'}</h2><p class="lead">例如：我要两杯冰拿铁，少冰少糖，换燕麦奶，其中一杯加浓，打包，我比较赶时间。</p></div>${progress(2)}</div><div class="mode-switch"><button data-action="connect">切换表达方式</button><span>当前方式：${state.communication}</span></div><section class="panel free-order"><div class="conversation-preview"><div class="speaker customer"><small>顾客</small><p>${state.freeInput?esc(state.freeInput):'你的表达会出现在这里，并同步变成咖啡师可见的字幕。'}</p></div><div class="speaker barista"><small>咖啡师看到</small><p>${state.freeInput?esc(state.freeInput):'等待顾客表达……'}</p></div></div>${voice?`<button class="big-mic" data-action="capture-voice">🎙️<strong>${state.freeInput?'重新说一次':'按下开始说话'}</strong><small>演示版点击后模拟识别一条复杂订单</small></button>`:`<label class="field"><strong>输入点单或其他需求</strong><textarea data-free-input placeholder="例如：一杯冰拿铁，少冰，换燕麦奶……">${esc(state.freeInput)}</textarea></label>`}<button class="step-action" data-action="understand" ${state.freeInput?'':'disabled'}>AI 整理为订单，请双方确认</button><div class="example-chips"><span>可以自由表达：</span><button data-example="一杯冰拿铁，少冰少糖，换燕麦奶，加一份浓缩，打包，我想知道等多久">复杂点单</button><button data-example="我想要不含咖啡的热饮，不要太甜">描述偏好</button><button data-example="不好意思，我想把刚才那杯改成少冰">临时改单</button></div></section>`}
+function freeOrder(){
+  const voice=state.communication==='语音转文字';
+  const voiceControl=state.transcribing
+    ? `<div class="big-mic processing"><span class="spinner"></span><strong>正在本机转写…</strong><small>正在将本次主动录制的短音频转换为中文字幕</small></div>`
+    : `<button class="big-mic ${state.recording?'recording':''}" data-action="capture-voice">${state.recording?'⏹️':'🎙️'}<strong>${state.recording?'点击结束并转写':(state.freeInput?'重新录音':'开始录音')}</strong><small>${state.recording?'正在录音，请自然说出完整需求':'录音将安全发送至语音转写服务，不会持续监听'}</small></button>`;
+  return `<div class="page-head"><div><div class="eyebrow">${voice?'语音点单':'文字点单'} · 对话会变成视觉订单</div><h2>${voice?'直接说出你想喝的':'把你的需求打出来'}</h2><p class="lead">例如：我要两杯冰拿铁，少冰少糖，换燕麦奶，其中一杯加浓，打包，我比较赶时间。</p></div>${progress(2)}</div><div class="mode-switch"><button data-action="connect">切换表达方式</button><span>当前方式：${state.communication}</span></div><section class="panel free-order"><div class="conversation-preview"><div class="speaker customer"><small>顾客</small><p data-live-input="customer">${state.freeInput?esc(state.freeInput):'你的表达会出现在这里，并同步变成咖啡师可见的字幕。'}</p></div><div class="speaker barista"><small>咖啡师看到</small><p data-live-input="barista">${state.freeInput?esc(state.freeInput):'等待顾客表达……'}</p></div></div>${voice?`${voiceControl}${state.asrError?`<div class="asr-error">${esc(state.asrError)}</div>`:''}`:`<label class="field"><strong>输入点单或其他需求</strong><textarea data-free-input placeholder="例如：一杯冰拿铁，少冰，换燕麦奶……">${esc(state.freeInput)}</textarea></label>`}<button class="step-action" data-action="understand" ${state.freeInput&&!state.recording&&!state.transcribing?'':'disabled'}>AI 整理为订单，请双方确认</button><div class="example-chips"><span>备用体验文本：</span><button data-example="一杯冰拿铁，少冰少糖，换燕麦奶，加一份浓缩，打包，我想知道等多久">复杂点单</button><button data-example="我想要不含咖啡的热饮，不要太甜">描述偏好</button><button data-example="不好意思，我想把刚才那杯改成少冰">临时改单</button></div></section>`
+}
+
+async function toggleRecording(){
+  if(state.transcribing)return;
+  if(state.recording){
+    state.recorder?.stop();
+    state.stream?.getTracks().forEach(track=>track.stop());
+    return;
+  }
+  if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){
+    state.asrError='当前浏览器不支持录音，请使用最新版 Chrome 或 Safari。';render();return;
+  }
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,channelCount:1}});
+    const preferred=['audio/webm;codecs=opus','audio/webm','audio/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';
+    const recorder=new MediaRecorder(stream,preferred?{mimeType:preferred}:undefined);
+    state.stream=stream;state.recorder=recorder;state.chunks=[];state.asrError='';state.freeInput='';
+    recorder.ondataavailable=e=>{if(e.data.size)state.chunks.push(e.data)};
+    recorder.onstop=async()=>{
+      const type=recorder.mimeType||'audio/webm';
+      const blob=new Blob(state.chunks,{type});
+      state.recording=false;state.transcribing=true;render();
+      try{
+        const ext=type.includes('mp4')?'m4a':type.includes('ogg')?'ogg':'webm';
+        const form=new FormData();form.append('audio',blob,`wemeet-recording.${ext}`);
+        const response=await fetch('/api/transcribe',{method:'POST',body:form,headers:{'X-WeMeet-Consent':'user-initiated'}});
+        const data=await response.json().catch(()=>({}));
+        if(!response.ok||!data.ok)throw new Error(data.error||'transcription_failed');
+        state.freeInput=(data.text||'').trim();
+        if(!state.freeInput)state.asrError='没有识别到清晰语音，请靠近设备后重试。';
+      }catch(error){
+        state.asrError='转写失败，请检查网络或稍后重试；也可以切换到文字输入。';
+      }finally{
+        state.transcribing=false;state.recorder=null;state.stream=null;state.chunks=[];render();
+      }
+    };
+    recorder.start(250);state.recording=true;render();
+  }catch(error){state.asrError='无法使用麦克风，请允许浏览器访问麦克风后重试。';render()}
+}
 
 function parseFreeOrder(){const t=state.freeInput;let id=t.includes('抹茶')&&t.includes('不含咖啡')?'matcha-milk':t.includes('白桃')?'peach-tea':t.includes('美式')?'soe':'latte';const p=product(id);const item=makeDraft(p);if(p.temps.includes('冷')&&(t.includes('冰')||t.includes('冷')))item.temp='冷';if(t.includes('热')&&p.temps.includes('热'))item.temp='热';if(t.includes('少冰'))item.ice='少冰';else if(t.includes('去冰')||t.includes('不要冰'))item.ice='去冰';if(t.includes('少糖')||t.includes('不要太甜'))item.sugar='少糖';if(t.includes('不加糖'))item.sugar='不另外加糖';if(t.includes('燕麦'))item.milk='燕麦奶 +4';if(t.includes('厚椰'))item.milk='厚椰乳';if(t.includes('加浓')||t.includes('浓缩'))item.shots='加一份浓缩 +4';const m=t.match(/[两二2]杯/);if(m&&t.includes('其中一杯')&&item.shots==='加一份浓缩 +4'){const regular={...item,qty:1,shots:'标准浓度'};const extra={...item,qty:1};state.cart=[regular,extra]}else{if(m)item.qty=2;state.cart=[item]};if(t.includes('打包'))state.service.pickup='打包带走';if(t.includes('赶时间'))state.service.urgency='比较赶时间';else if(t.includes('等多久')||t.includes('等待'))state.service.urgency='想知道等待时间';state.inputResult=true;state.screen='confirm'}
 
@@ -88,7 +132,7 @@ document.addEventListener('click',e=>{const el=e.target.closest('button');if(!el
  if(el.dataset.serviceReply){state.serviceReply=el.dataset.serviceReply;navigator.vibrate?.(80);render();return}
  const screens={connect:'connect',order:'order',cart:'cart','confirm-order':'confirm','send-order':'partner','partner-demo':'partner',service:'service',feedback:'feedback',home:'home'};
  if(screens[action]){state.screen=screens[action];render();return}
- if(action==='capture-voice'){state.freeInput='两杯冰拿铁，少冰少糖，换燕麦奶，其中一杯加一份浓缩，打包，我比较赶时间';render();return}
+ if(action==='capture-voice'){toggleRecording();return}
  if(action==='understand'){parseFreeOrder();render();return}
  if(action==='save-item'){if(state.editing===null)state.cart.push({...state.draft});else state.cart[state.editing]={...state.draft};state.editing=null;state.screen='order';render();return}
  if(action==='pickup'){state.serviceReply='订单已完成，请凭 #018 取餐';navigator.vibrate?.([120,80,120]);render();return}
@@ -96,5 +140,5 @@ document.addEventListener('click',e=>{const el=e.target.closest('button');if(!el
  if(action==='submit-feedback'){const r=JSON.parse(localStorage.getItem('wemeet-feedback')||'[]');r.push({...state.feedback,createdAt:new Date().toISOString()});localStorage.setItem('wemeet-feedback',JSON.stringify(r));state.screen='thanks';render();return}
  if(action==='reset'){Object.assign(state,{screen:'home',communication:'点击卡片',category:'经典咖啡',editing:null,draft:null,cart:[],service:{pickup:'店内享用',urgency:'不着急',note:''},partnerStep:0,reply:'',serviceIntent:'',serviceReply:'',freeInput:'',inputResult:false,feedback:{clear:0,helpful:0,pressure:0,note:''}});render()}
 });
-document.addEventListener('input',e=>{if(e.target.matches('[data-free-input]'))state.freeInput=e.target.value;if(e.target.matches('[data-item-note]'))state.draft.note=e.target.value;if(e.target.matches('[data-service-note]'))state.service.note=e.target.value;if(e.target.matches('[data-note]'))state.feedback.note=e.target.value});
+document.addEventListener('input',e=>{if(e.target.matches('[data-free-input]')){state.freeInput=e.target.value;document.querySelectorAll('[data-live-input]').forEach(node=>{node.textContent=state.freeInput||(node.dataset.liveInput==='customer'?'你的表达会出现在这里，并同步变成咖啡师可见的字幕。':'等待顾客表达……')});const understand=document.querySelector('[data-action="understand"]');if(understand)understand.disabled=!state.freeInput.trim()}if(e.target.matches('[data-item-note]'))state.draft.note=e.target.value;if(e.target.matches('[data-service-note]'))state.service.note=e.target.value;if(e.target.matches('[data-note]'))state.feedback.note=e.target.value});
 render();
