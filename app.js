@@ -45,7 +45,7 @@ const quickReplies = [
 ];
 
 const state = {
-  screen:'home', modal:null, category:'全部', selected:null, freeText:'', transcript:'', parseError:'',
+  screen:'home', modal:null, category:'全部', selected:null, candidate:null, freeText:'', transcript:'', parseError:'', parsing:false,
   recording:false, transcribing:false, recorder:null, stream:null, chunks:[],
   orders:[
     {id:'A18',source:'美团扫码',time:'14:26',status:'new',items:[{name:'SOE 拿铁',qty:1,spec:'冷 · 换燕麦奶'}],note:'打包带走，请不要吸管',alert:'新订单',changed:null,messages:[]},
@@ -117,11 +117,17 @@ function renderMenu(){
 }
 
 function renderConfirm(){
- const p=state.selected;
- if(!p){state.screen='communicate';return renderCommunicate()}
- return `<section class="page-head compact-head"><button class="back" data-action="communicate">←</button><div><div class="eyebrow">双方确认</div><h2>订单整理好了</h2></div></section>
- <div class="confirm-layout"><div class="order-paper"><div class="paper-top"><span>ETHER COFFEE</span><b>候选订单</b></div><div class="confirm-product"><span>${p.emoji}</span><div><h3>${p.name} × 1</h3><p>${esc(p.spec||p.defaults.join(' · '))}</p></div><b>${money(p.price)}</b></div>${state.freeText?`<div class="raw-text"><small>顾客原始表达</small><p>“${esc(state.freeText)}”</p></div>`:''}<div class="double-check">👀 请顾客和咖啡师一起确认，AI 不会替双方做决定。</div></div>
- <div class="confirm-actions"><button class="secondary" data-action="communicate">返回修改</button><button class="primary-button" data-action="submit-order">双方确认，发送到工作台</button></div></div>`
+ const candidate=state.candidate;
+ const simple=state.selected;
+ if(!candidate&&!simple){state.screen='communicate';return renderCommunicate()}
+ const items=candidate?candidate.items:[{productId:simple.id,name:simple.name,quantity:1,temperature:null,flavor:null,extras:[],note:'',unitPrice:simple.price,lineTotal:simple.price,spec:simple.spec||simple.defaults.join(' · ')}];
+ const total=candidate?candidate.total:simple.price;
+ return `<section class="page-head compact-head"><button class="back" data-action="communicate">←</button><div><div class="eyebrow">双方确认</div><h2>${candidate?'AI 已整理候选订单':'订单整理好了'}</h2></div></section>
+ <div class="confirm-layout"><div class="order-paper"><div class="paper-top"><span>ETHER COFFEE</span><b>候选订单 · 未提交</b></div>
+ ${items.map(i=>`<div class="confirm-product"><span>${product(i.productId)?.emoji||'☕'}</span><div><h3>${esc(i.name)} × ${i.quantity}</h3><p>${esc([i.spec,i.temperature,i.flavor,...(i.extras||[]),i.note].filter(Boolean).join(' · ')||'按菜单默认制作')}</p></div><b>${money(i.lineTotal)}</b></div>`).join('')}
+ ${candidate?`<div class="candidate-summary"><span>${candidate.fulfillment||'取餐方式待确认'}</span><b>合计 ${money(total)}</b></div>`:''}
+ ${state.freeText?`<div class="raw-text"><small>顾客原始表达</small><p>“${esc(state.freeText)}”</p></div>`:''}<div class="double-check">👀 请顾客和咖啡师一起确认。AI 只整理候选订单，不会替双方做决定。</div></div>
+ <div class="confirm-actions"><button class="secondary" data-action="edit-input">返回修改</button><button class="primary-button" data-action="submit-order">双方确认，发送到工作台</button></div></div>`
 }
 
 function renderDashboard(){
@@ -179,7 +185,8 @@ function renderInputModal(){return modalShell(state.inputKind==='voice'?'语音�
  <div class="live-caption"><small>双方都能看到的文字</small><textarea id="free-text" placeholder="例如：一杯 SOE 燕麦拿铁，冷的，打包带走">${esc(state.freeText)}</textarea></div>
  ${state.parseError?`<div class="error-box">${esc(state.parseError)}</div>`:''}
  ${state.inputKind==='voice'?`<button class="record-button ${state.recording?'recording':''}" data-action="record">${state.transcribing?'正在转写…':state.recording?'■ 结束录音':'● 开始录音'}</button><p class="modal-tip">录音只在你主动操作后上传用于转写，不在浏览器中长期保存。</p>`:''}
- <div class="modal-actions"><button class="secondary" data-action="open-writing">改用手写</button><button class="primary-button" data-action="parse-order">整理为候选订单</button></div>`)}
+ <div class="ai-parser-note">✨ 支持多杯、不同规格、追加修改和口语指代；有歧义时会先向你确认。</div>
+ <div class="modal-actions"><button class="secondary" data-action="open-writing">改用手写</button><button class="primary-button" data-action="parse-order" ${state.parsing?'disabled':''}>${state.parsing?'AI 正在整理…':'AI 整理为候选订单'}</button></div>`)}
 
 function renderToolbox(){return modalShell('选择现在最方便的方式',`<p class="modal-lead">不需要解释原因，任何时候都可以切换。</p><div class="tool-grid"><button data-action="text-mode"><span>⌨️</span><b>文字输入</b></button><button data-action="voice-mode"><span>🎙️</span><b>语音字幕</b></button><button data-action="open-writing"><span>✍️</span><b>双向手写</b></button><button data-action="open-bigtext"><span>🔤</span><b>全屏大字</b></button><button data-action="open-replies"><span>💬</span><b>快捷回复</b></button><button data-action="open-help"><span>🫶</span><b>沟通求助</b></button></div><button class="sign-invite compact-sign" data-action="open-sign"><span>🤟</span><span><b>和咖啡师学一句手语</b><small>友好互动，不用于处理订单</small></span><b>→</b></button>`)}
 
@@ -213,14 +220,28 @@ function detectProduct(text){
  return null;
 }
 
-function parseOrder(){
- const box=document.querySelector('#free-text');if(box)state.freeText=box.value.trim();
- const p=detectProduct(state.freeText);state.parseError='';
- if(!p){state.parseError='没有识别到明确商品。请说出完整名称，或改用点选菜单。';render();return}
- let specs=[...p.defaults];const t=state.freeText;
+function localParseOrder(){
+ const p=detectProduct(state.freeText);if(!p)return false;
+ let specs=[...p.defaults],t=state.freeText;
  if(t.includes('少冰'))specs=specs.map(x=>x.includes('冰')?'少冰':x);if(t.includes('去冰')||t.includes('不要冰'))specs=specs.map(x=>x.includes('冰')?'去冰':x);
- if(t.includes('少糖'))specs=specs.map(x=>x.includes('糖')?'少糖':x);if(t.includes('无糖')||t.includes('不加糖'))specs=specs.map(x=>x.includes('糖')?'不另外加糖':x);
- state.selected={...p,spec:specs.join(' · ')};state.modal=null;state.screen='confirm';render();
+ state.selected={...p,spec:specs.join(' · ')};state.candidate=null;state.modal=null;state.screen='confirm';return true;
+}
+async function parseOrder(){
+ const box=document.querySelector('#free-text');if(box)state.freeText=box.value.trim();state.parseError='';
+ if(!state.freeText){state.parseError='请先说出或输入点单需求。';render();return}
+ state.parsing=true;render();
+ try{
+  const response=await fetch('/api/parse_order',{method:'POST',headers:{'Content-Type':'application/json','X-WeMeet-Consent':'user-initiated'},body:JSON.stringify({text:state.freeText})});
+  const data=await response.json().catch(()=>({}));if(!response.ok||!data.ok)throw new Error(data.error||'parse_failed');
+  const c=data.candidate;
+  if(c.needsClarification){state.parsing=false;state.parseError=c.clarificationQuestion||'有些内容还不明确，请补充后再整理。';render();return}
+  if(!c.items?.length)throw new Error('empty_order');
+  state.candidate=c;state.selected=null;state.parsing=false;state.modal=null;state.screen='confirm';render();
+ }catch(e){
+  state.parsing=false;
+  if(localParseOrder()){state.toast='AI 服务暂不可用，已使用本地菜单规则整理';render();return}
+  state.parseError='暂时无法整理这段复杂订单，请改用点选菜单，或分开说明每杯饮品。';render();
+ }
 }
 
 async function toggleRecord(){
@@ -261,7 +282,8 @@ function handleAction(a,el){
  if(a==='close-modal'){state.modal=null;render()}
  if(a==='parse-order')parseOrder();
  if(a==='record')toggleRecord();
- if(a==='submit-order'){const p=state.selected;state.orders.unshift({id:'A20',source:'店内沟通',time:new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}),status:'new',items:[{name:p.name,qty:1,spec:p.spec||p.defaults.join(' · ')}],note:state.freeText,alert:'双方已确认',changed:null,messages:[]});state.screen='dashboard';state.toast='订单已发送到咖啡师工作台';render()}
+ if(a==='edit-input'){state.screen='communicate';state.inputKind='text';state.modal='input';render()}
+ if(a==='submit-order'){const items=state.candidate?state.candidate.items.map(i=>({name:i.name,qty:i.quantity,spec:[i.temperature,i.flavor,...(i.extras||[]),i.note].filter(Boolean).join(' · ')||'按菜单默认制作'})):[{name:state.selected.name,qty:1,spec:state.selected.spec||state.selected.defaults.join(' · ')}];state.orders.unshift({id:'A20',source:'店内沟通 · AI整理',time:new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}),status:'new',items,note:[state.candidate?.fulfillment,state.candidate?.overallNote].filter(Boolean).join(' · ')||state.freeText,alert:'双方已确认',changed:null,messages:[]});state.screen='dashboard';state.candidate=null;state.toast='订单已发送到咖啡师工作台';render()}
  if(a==='close-order'){state.activeOrder=null;render()}
  if(a==='send-message'){const input=document.querySelector('#order-message');const o=state.orders.find(x=>x.id===state.activeOrder);if(input?.value.trim()){o.messages.push(`咖啡师 ${new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}：${input.value.trim()}`);state.draftMessage='';state.toast='文字已展示给顾客';render()}}
  if(a==='clear-canvas'){initCanvas()}
