@@ -74,7 +74,15 @@ class handler(BaseHTTPRequestHandler):
             result=self._validate(parsed)
             self._json(200,{"ok":True,"engine":"openai-structured-order","candidate":result})
         except urllib.error.HTTPError as exc:
-            self._json(502,{"ok":False,"error":"provider_error","status":exc.code})
+            provider_code = "unknown"
+            provider_param = None
+            try:
+                detail = json.loads(exc.read().decode()).get("error", {})
+                provider_code = str(detail.get("code") or detail.get("type") or "unknown")[:80]
+                provider_param = str(detail.get("param"))[:80] if detail.get("param") else None
+            except Exception:
+                pass
+            self._json(502,{"ok":False,"error":"provider_error","status":exc.code,"providerCode":provider_code,"providerParam":provider_param})
         except (KeyError,ValueError,TypeError,json.JSONDecodeError): self._json(502,{"ok":False,"error":"invalid_provider_response"})
         except Exception: self._json(500,{"ok":False,"error":"parse_failed"})
     def _validate(self,data:dict)->dict:
