@@ -93,14 +93,22 @@ class handler(BaseHTTPRequestHandler):
             pid=item.get("product_id")
             if pid not in MENU: invalid=True; continue
             flavor=item.get("flavor")
+            if flavor in ("null", "None", "", None): flavor=None
+            temperature=item.get("temperature")
+            if temperature in ("null", "None", "", None): temperature=None
+            if temperature not in (None, "冷", "热"): invalid=True; temperature=None
             if pid in FLAVORS and flavor not in FLAVORS[pid]: invalid=True
             if pid not in FLAVORS: flavor=None
             extras=[x for x in item.get("extras",[]) if x in EXTRAS]
             # Prevent wrong-priced espresso modifier family.
             extras=[x for x in extras if not (x=="双份浓缩" and pid.startswith("soe-")) and not (x=="SOE 双份浓缩" and not pid.startswith("soe-"))]
             name,base=MENU[pid]; extra_total=sum(EXTRAS[x] for x in extras); qty=max(1,min(20,int(item.get("quantity",1))))
-            clean.append({"productId":pid,"name":name,"quantity":qty,"temperature":item.get("temperature"),"flavor":flavor,"extras":extras,"note":str(item.get("note",""))[:200],"unitPrice":base+extra_total,"lineTotal":(base+extra_total)*qty})
+            clean.append({"productId":pid,"name":name,"quantity":qty,"temperature":temperature,"flavor":flavor,"extras":extras,"note":str(item.get("note",""))[:200],"unitPrice":base+extra_total,"lineTotal":(base+extra_total)*qty})
+        fulfillment=data.get("fulfillment")
+        if fulfillment in ("null", "None", "", None): fulfillment=None
+        if fulfillment not in (None, "堂食", "打包带走"): invalid=True; fulfillment=None
         needs=bool(data.get("needs_clarification")) or invalid or not clean
         question=data.get("clarification_question")
+        if question in ("null", "None", "", None): question=None
         if needs and not question: question="有些内容还不明确，请确认具体商品、数量或风味。"
-        return {"items":clean,"fulfillment":data.get("fulfillment"),"overallNote":str(data.get("overall_note", ""))[:300],"needsClarification":needs,"clarificationQuestion":question,"total":sum(x["lineTotal"] for x in clean)}
+        return {"items":clean,"fulfillment":fulfillment,"overallNote":str(data.get("overall_note", ""))[:300],"needsClarification":needs,"clarificationQuestion":question,"total":sum(x["lineTotal"] for x in clean)}
