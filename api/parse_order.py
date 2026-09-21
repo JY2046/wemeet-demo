@@ -45,7 +45,9 @@ SYSTEM = """你是 Ether Coffee 的受约束订单理解器。只把顾客原话
 4. 气泡冰美式必须从沃柑/接骨木/话梅选风味；风味 Dirty 必须从香芋/干姜/海盐玫瑰选风味。没说就澄清。
 5. 普通拼配双份浓缩用“双份浓缩”+5；SOE 商品用“SOE 双份浓缩”+8；换燕麦奶+5。
 6. 明确说删除/不要某杯时不要保留该杯。无法对应菜单时澄清。
-7. 输出只是双方确认前的候选订单。"""
+7. 输出只是双方确认前的候选订单。
+8. 不得遗漏原话中的换奶、双份浓缩、温度、数量和取餐方式。
+示例：“两杯拿铁，一杯普通拿铁换燕麦奶，另一杯SOE拿铁加双份浓缩，都要冷的”必须输出两项：blend-latte + 换燕麦奶，以及 soe-latte + SOE 双份浓缩，两项温度均为冷。"""
 MENU_TEXT = "\n".join(f"{pid}: {name} ¥{price}" for pid,(name,price) in MENU.items())
 
 class handler(BaseHTTPRequestHandler):
@@ -73,7 +75,7 @@ class handler(BaseHTTPRequestHandler):
             req=urllib.request.Request("https://api.openai.com/v1/chat/completions",data=json.dumps(request_body,ensure_ascii=False).encode(),method="POST",headers={"Authorization":f"Bearer {key}","Content-Type":"application/json"})
             with urllib.request.urlopen(req,timeout=45) as response: raw=json.loads(response.read().decode())
             parsed=json.loads(raw["choices"][0]["message"]["content"])
-            result=self._validate(parsed)
+            result=self._validate(parsed, text)
             self._json(200,{"ok":True,"engine":"openai-structured-order","candidate":result})
         except urllib.error.HTTPError as exc:
             provider_code = "unknown"
@@ -87,7 +89,7 @@ class handler(BaseHTTPRequestHandler):
             self._json(502,{"ok":False,"error":"provider_error","status":exc.code,"providerCode":provider_code,"providerParam":provider_param})
         except (KeyError,ValueError,TypeError,json.JSONDecodeError): self._json(502,{"ok":False,"error":"invalid_provider_response"})
         except Exception: self._json(500,{"ok":False,"error":"parse_failed"})
-    def _validate(self,data:dict)->dict:
+    def _validate(self,data:dict,source_text:str)->dict:
         clean=[]; invalid=False
         for item in data.get("items",[]):
             pid=item.get("product_id")
@@ -107,8 +109,16 @@ class handler(BaseHTTPRequestHandler):
         fulfillment=data.get("fulfillment")
         if fulfillment in ("null", "None", "", None): fulfillment=None
         if fulfillment not in (None, "堂食", "打包带走"): invalid=True; fulfillment=None
-        needs=bool(data.get("needs_clarification")) or invalid or not clean
+        # Cross-check explicit modifiers in the source so the LLM cannot silently drop them.
+        all_extras=[x for item in clean for x in item["extras"]]
+        missing=[]
+        if "换燕麦奶" in source_text and "换燕麦奶" not in all_extras: missing.append("换燕麦奶")
+        if ("双份浓缩" in source_text or "两份浓缩" in source_text) and not any(x in all_extras for x in ("双份浓缩","SOE 双份浓缩")): missing.append("双份浓缩")
+        if "打包" in source_text and fulfillment != "打包带走": missing.append("打包带走")
+        if "堂食" in source_text and fulfillment != "堂食": missing.append("堂食")
+        needs=bool(data.get("needs_clarification")) or invalid or not clean or bool(missing)
         question=data.get("clarification_question")
+        if missing: question="我可能遗漏了“"+"、".join(missing)+"”，请确认它分别属于哪一杯。"
         if question in ("null", "None", "", None): question=None
         if needs and not question: question="有些内容还不明确，请确认具体商品、数量或风味。"
         return {"items":clean,"fulfillment":fulfillment,"overallNote":str(data.get("overall_note", ""))[:300],"needsClarification":needs,"clarificationQuestion":question,"total":sum(x["lineTotal"] for x in clean)}
