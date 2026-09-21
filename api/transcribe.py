@@ -38,7 +38,7 @@ class handler(BaseHTTPRequestHandler):
             boundary = "----WeMeetAudioBoundary7MA4YWxk"; chunks = []
             def add_field(name, value): chunks.extend([f"--{boundary}\r\n".encode(), f'Content-Disposition: form-data; name="{name}"\r\n\r\n'.encode(), value.encode(), b"\r\n"])
             add_field("model", "gpt-4o-mini-transcribe"); add_field("language", "zh")
-            add_field("prompt", "Ether Coffee 咖啡点单。常见词：拿铁、美式、少冰、去冰、少糖、燕麦奶、厚椰乳、加一份浓缩、打包带走。")
+            add_field("prompt", "Ether Coffee 咖啡点单。菜单常见词：焦糖坚果拼配、SOE、花魁、美式、拿铁、燕麦拿铁、Dirty、厚椰拿铁、沃柑、接骨木、话梅气泡冰美式、香芋、干姜、海盐玫瑰、玉米软糖、黑芝麻拿铁、苹果奶油派、姜黄肉桂拿铁、苹果肉桂拿铁、椰子糖、葡萄冰萃、罗勒和青柠、海盐芝士拿铁、桂花酒酿拿铁、咸摩卡、青椰美式、双份浓缩、换燕麦奶、打包带走。")
             chunks.extend([f"--{boundary}\r\n".encode(), f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'.encode(), f"Content-Type: {mime}\r\n\r\n".encode(), audio, b"\r\n", f"--{boundary}--\r\n".encode()])
             request = urllib.request.Request("https://api.openai.com/v1/audio/transcriptions", data=b"".join(chunks), method="POST", headers={"Authorization":f"Bearer {key}", "Content-Type":f"multipart/form-data; boundary={boundary}"})
             with urllib.request.urlopen(request, timeout=45) as response: result = json.loads(response.read().decode())
