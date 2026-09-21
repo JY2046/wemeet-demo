@@ -64,10 +64,12 @@ class handler(BaseHTTPRequestHandler):
             if "application/json" not in self.headers.get("Content-Type",""): self._json(415,{"ok":False,"error":"json_required"}); return
             payload=json.loads(self.rfile.read(length)); text=str(payload.get("text","")).strip()
             if not text or len(text)>2000: self._json(400,{"ok":False,"error":"invalid_text"}); return
+            output_contract = '''只输出 JSON 对象，不要 Markdown。必须包含：
+{"items":[{"product_id":"菜单ID","quantity":1,"temperature":"冷或热或null","flavor":"风味或null","extras":["合法加料"],"note":""}],"fulfillment":"堂食或打包带走或null","overall_note":"","needs_clarification":false,"clarification_question":null}'''
             request_body={"model":"gpt-4o-mini","temperature":0,"messages":[
-                {"role":"system","content":SYSTEM+"\n\n当前菜单：\n"+MENU_TEXT},
+                {"role":"system","content":SYSTEM+"\n\n"+output_contract+"\n\n当前菜单：\n"+MENU_TEXT},
                 {"role":"user","content":"顾客原话："+text}
-            ],"response_format":{"type":"json_schema","json_schema":SCHEMA}}
+            ],"response_format":{"type":"json_object"}}
             req=urllib.request.Request("https://api.openai.com/v1/chat/completions",data=json.dumps(request_body,ensure_ascii=False).encode(),method="POST",headers={"Authorization":f"Bearer {key}","Content-Type":"application/json"})
             with urllib.request.urlopen(req,timeout=45) as response: raw=json.loads(response.read().decode())
             parsed=json.loads(raw["choices"][0]["message"]["content"])
