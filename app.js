@@ -1,196 +1,263 @@
 const app = document.querySelector('#app');
 
 const menu = [
-  { id:'soe', category:'经典咖啡', name:'耶加雪菲 SOE 美式', desc:'柑橘、红糖、巧克力', price:15, temps:['冷','热'], defaults:{temp:'冷',ice:'正常冰',sugar:'标准'}, accent:'🍊' },
-  { id:'grape', category:'经典咖啡', name:'黑葡萄美式', desc:'葡萄酸感，清爽果香', price:24, temps:['冷','热'], defaults:{temp:'冷',ice:'正常冰',sugar:'标准'}, accent:'🍇' },
-  { id:'salary', category:'经典咖啡', name:'升薪美式', desc:'顺口经典美式', price:20, temps:['冷','热'], defaults:{temp:'热',sugar:'标准'}, accent:'☕' },
-  { id:'latte', category:'经典咖啡', name:'拿铁', desc:'浓缩与牛奶', price:22, temps:['冷','热'], milk:true, defaults:{temp:'热',ice:'正常冰',sugar:'标准',milk:'鲜奶'}, accent:'🥛' },
-  { id:'coconut-latte', category:'经典咖啡', name:'厚椰拿铁', desc:'椰香浓郁', price:24, temps:['冷','热'], milk:true, defaults:{temp:'冷',ice:'正常冰',sugar:'标准',milk:'厚椰乳'}, accent:'🥥' },
-  { id:'dirty', category:'经典咖啡', name:'Dirty', desc:'冰牛奶与热浓缩', price:24, temps:['冷'], milk:true, locked:true, defaults:{temp:'冷',ice:'不加冰',sugar:'不另外加糖',milk:'鲜奶'}, accent:'🤎' },
-  { id:'oat-latte', category:'经典咖啡', name:'燕麦拿铁', desc:'燕麦奶基底', price:26, temps:['冷','热'], milk:true, defaults:{temp:'冷',ice:'正常冰',sugar:'标准',milk:'燕麦奶'}, accent:'🌾' },
-  { id:'matcha-latte', category:'经典咖啡', name:'抹茶拿铁（含咖）', desc:'抹茶与浓缩咖啡', price:26, temps:['冷','热'], milk:true, defaults:{temp:'冷',ice:'正常冰',sugar:'标准',milk:'鲜奶'}, accent:'🍵' },
-  { id:'taro-dirty', category:'创意咖啡', name:'香芋 Dirty', desc:'香芋与咖啡融合', price:24, temps:['冷'], milk:true, locked:true, defaults:{temp:'冷',ice:'不加冰',sugar:'标准',milk:'鲜奶'}, accent:'💜' },
-  { id:'salt-mocha', category:'创意咖啡', name:'咸摩卡', desc:'海盐与巧克力', price:24, temps:['冷','热'], milk:true, defaults:{temp:'冷',ice:'正常冰',sugar:'标准',milk:'鲜奶'}, accent:'🍫' },
-  { id:'osmanthus', category:'创意咖啡', name:'桂花酒酿拿铁', desc:'桂花与酒酿香气', price:26, temps:['冷','热'], milk:true, defaults:{temp:'热',ice:'正常冰',sugar:'标准',milk:'鲜奶'}, accent:'🌼' },
-  { id:'elderberry', category:'创意咖啡', name:'接骨木气泡美式', desc:'清新气泡果香', price:22, temps:['冷'], defaults:{temp:'冷',ice:'正常冰',sugar:'标准'}, accent:'🫧' },
-  { id:'lemon', category:'创意咖啡', name:'柠香冰咖', desc:'柠檬清香', price:20, temps:['冷'], defaults:{temp:'冷',ice:'正常冰',sugar:'标准'}, accent:'🍋' },
-  { id:'green-coconut', category:'创意咖啡', name:'青椰美式', desc:'青椰水与浓缩', price:24, temps:['冷'], defaults:{temp:'冷',ice:'正常冰',sugar:'标准'}, accent:'🌴' },
-  { id:'matcha-milk', category:'无咖啡因', name:'抹茶鲜奶（不含咖啡）', desc:'抹茶与鲜奶', price:30, temps:['冷','热'], milk:true, noCoffee:true, defaults:{temp:'热',ice:'正常冰',sugar:'标准',milk:'鲜奶'}, accent:'🍵' },
-  { id:'pomelo', category:'无咖啡因', name:'腌渍柚子樱花茶', desc:'柚子与樱花', price:26, temps:['冷','热'], noCoffee:true, defaults:{temp:'冷',ice:'正常冰',sugar:'标准'}, accent:'🌸' },
-  { id:'peach-tea', category:'无咖啡因', name:'白桃乌龙茶', desc:'白桃与乌龙', price:26, temps:['冷','热'], noCoffee:true, defaults:{temp:'冷',ice:'正常冰',sugar:'标准'}, accent:'🍑' },
-  { id:'brown-rose', category:'无咖啡因', name:'古法黑糖玫瑰茶', desc:'黑糖与玫瑰', price:22, temps:['冷','热'], noCoffee:true, defaults:{temp:'热',ice:'正常冰',sugar:'标准'}, accent:'🌹' },
-  { id:'temper-peach', category:'气泡水', name:'脾气水蜜桃', desc:'水蜜桃风味气泡', price:22, temps:['冷'], noCoffee:true, defaults:{temp:'冷',ice:'正常冰',sugar:'标准'}, accent:'🍑' },
-  { id:'passion-plum', category:'气泡水', name:'百香话梅苏打', desc:'百香果与话梅', price:22, temps:['冷'], noCoffee:true, defaults:{temp:'冷',ice:'正常冰',sugar:'标准'}, accent:'✨' },
-  { id:'strawberry', category:'气泡水', name:'草莓苏打', desc:'草莓果香', price:22, temps:['冷'], noCoffee:true, defaults:{temp:'冷',ice:'正常冰',sugar:'标准'}, accent:'🍓' },
-  { id:'kiwi', category:'好吃的', name:'奇亚籽可颂', desc:'烘焙点心', price:16, food:true, defaults:{}, accent:'🥐' },
-  { id:'choco', category:'好吃的', name:'巧克力双色羊角', desc:'巧克力可颂', price:18, food:true, defaults:{}, accent:'🍫' },
-  { id:'bbq', category:'好吃的', name:'叉烧可颂', desc:'咸口可颂', price:16, food:true, defaults:{}, accent:'🥐' },
-  { id:'butter', category:'好吃的', name:'招牌黄油可颂', desc:'经典黄油香', price:12, food:true, defaults:{}, accent:'🧈' }
+  {id:'grape',name:'黑葡萄美式',price:24,emoji:'🍇',category:'咖啡',defaults:['冷','正常冰','标准糖']},
+  {id:'salary',name:'升薪美式',price:20,emoji:'☕',category:'咖啡',defaults:['热','标准糖']},
+  {id:'latte',name:'拿铁',price:22,emoji:'🥛',category:'咖啡',defaults:['热','鲜奶','标准糖']},
+  {id:'coconut-latte',name:'厚椰拿铁',price:24,emoji:'🥥',category:'咖啡',defaults:['冷','正常冰','厚椰乳']},
+  {id:'oat-latte',name:'燕麦拿铁',price:26,emoji:'🌾',category:'咖啡',defaults:['冷','正常冰','燕麦奶']},
+  {id:'matcha-milk',name:'抹茶鲜奶（无咖啡）',price:24,emoji:'🍵',category:'非咖',defaults:['冷','正常冰','鲜奶']},
+  {id:'peach-tea',name:'白桃乌龙茶',price:18,emoji:'🍑',category:'非咖',defaults:['冷','正常冰','标准糖']},
+  {id:'strawberry',name:'草莓苏打',price:22,emoji:'🍓',category:'非咖',defaults:['冷','正常冰']},
+  {id:'butter',name:'招牌黄油可颂',price:16,emoji:'🥐',category:'烘焙',defaults:['加热']},
+  {id:'bbq',name:'叉烧可颂',price:22,emoji:'🥪',category:'烘焙',defaults:['加热']}
+];
+
+const signCards = [
+  {word:'你好',hint:'见面时，用手语和咖啡师打个招呼。',emoji:'👋'},
+  {word:'谢谢',hint:'收到咖啡后，用手语表达感谢。',emoji:'🤟'},
+  {word:'很高兴认识你',hint:'第一次见面，也可以这样表达友好。',emoji:'😊'},
+  {word:'咖啡很好喝',hint:'喜欢今天的咖啡，告诉咖啡师吧。',emoji:'☕'},
+  {word:'下次见',hint:'离开前，和咖啡师约定下次再见。',emoji:'🙌'}
+];
+
+const quickReplies = [
+  '请稍等，我正在查看','请用文字写下来','这款今天售罄了','可以为您更换其他饮品','预计还需 10 分钟','您的饮品做好了','请到取餐区取餐','我需要请同事协助'
 ];
 
 const state = {
-  screen:'home', communication:'点击卡片', category:'经典咖啡', editing:null, draft:null, cart:[], service:{pickup:'店内享用',urgency:'不着急',note:''}, partnerStep:0, reply:'', serviceIntent:'', serviceReply:'', freeInput:'', inputResult:false, recording:false, transcribing:false, asrError:'', parseError:'', recorder:null, stream:null, chunks:[], feedback:{clear:0,helpful:0,pressure:0,note:''}
+  screen:'home', modal:null, category:'全部', selected:null, freeText:'', transcript:'', parseError:'',
+  recording:false, transcribing:false, recorder:null, stream:null, chunks:[],
+  orders:[
+    {id:'A18',source:'美团扫码',time:'14:26',status:'new',items:[{name:'黑葡萄美式',qty:1,spec:'冷 · 少冰 · 少糖'}],note:'打包带走，请不要吸管',alert:'新订单',changed:null,messages:[]},
+    {id:'A17',source:'店内沟通',time:'14:21',status:'making',items:[{name:'厚椰拿铁',qty:1,spec:'冷 · 正常冰'}],note:'',alert:'',changed:'正常糖 → 不另外加糖',messages:['顾客 14:23：麻烦改成不另外加糖']},
+    {id:'A16',source:'美团扫码',time:'14:15',status:'ready',items:[{name:'招牌黄油可颂',qty:1,spec:'加热'}],note:'',alert:'',changed:null,messages:[]}
+  ],
+  activeOrder:null, draftMessage:'', bigText:'', writer:'customer', signIndex:0, signStage:'choose', toast:''
 };
 
-const esc = (v='') => String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-const product = id => menu.find(x=>x.id===id);
+const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const money = n => `¥${n}`;
-const drinkOptions = {
-  ice:['正常冰','少冰','去冰'], sugar:['标准','少糖','不另外加糖'], milk:['鲜奶','燕麦奶 +4','厚椰乳'], shots:['标准浓度','加一份浓缩 +4']
-};
-function progress(n){return `<div class="progress">${[1,2,3,4].map(i=>`<i class="${i<=n?'active':''}"></i>`).join('')}</div>`}
-function itemPrice(item){let p=product(item.id).price;if(item.milk==='燕麦奶 +4')p+=4;if(item.shots==='加一份浓缩 +4')p+=4;return p*item.qty}
-function total(){return state.cart.reduce((n,x)=>n+itemPrice(x),0)}
-function itemSummary(i){const p=product(i.id);if(p.food)return `${i.qty} 份`;return [i.temp,i.temp==='冷'?i.ice:'',i.sugar,i.milk,i.shots,i.qty>1?`${i.qty} 杯`:''].filter(Boolean).join(' · ')}
-function meaningfulChanges(i){const p=product(i.id), d=p.defaults;return [['温度',i.temp,d.temp],['冰量',i.ice,d.ice],['甜度',i.sugar,d.sugar],['奶基底',i.milk,d.milk],['浓度',i.shots,'标准浓度']].filter(x=>x[1]&&x[1]!==x[2])}
+const statusLabel = {new:'待接单',making:'制作中',ready:'可取餐',done:'已完成'};
+const product = id => menu.find(x=>x.id===id);
 
-function home(){return `<div class="hero"><section class="hero-copy"><div class="eyebrow">ETHER COFFEE × 会意</div><h1>让每一种表达，<br>都被温柔看见。</h1><p class="lead">会意把点单前、制作中和取餐时的沟通，变成顾客与听障咖啡师都看得见、能确认、可回应的信息。</p><div class="access-points"><span>👋 先说明沟通方式</span><span>👀 修改实时可见</span><span>💬 服务中双向回应</span></div><div class="action-row"><button class="primary" data-action="connect">开始一次无障碍服务</button><button class="secondary" data-action="partner-demo">直接看咖啡师端</button></div></section><aside class="hero-art"><div class="bubble one">燕麦奶，加一份浓缩</div><div class="bubble two">少冰修改已看见 👀</div><div class="bubble three">一起确认，再开始制作</div><div class="cup"></div></aside></div>`}
-
-
-function connect(){const methods=[['点击卡片','👆','不需要说话，点选需求卡'],['语音转文字','🎙️','我说话，系统把内容变成大字'],['直接打字','⌨️','输入文字，直接显示给咖啡师']];return `<div class="page-head"><div><div class="eyebrow">开始前 · 先建立共同语言</div><h2>你好，欢迎来到 Ether Coffee</h2><p class="lead">请选择你最方便的表达方式，之后随时可以切换。</p></div>${progress(1)}</div><section class="deaf-intro"><div class="intro-person"><span>👋</span><div><strong>你好，欢迎来到 Ether Coffee</strong><p>我有听力障碍，但我会看字幕、需求卡和视觉提醒，也可以在屏幕上回应你。</p></div></div><div class="method-grid">${methods.map(m=>`<button class="method ${state.communication===m[0]?'selected':''}" data-communication="${m[0]}"><b>${m[1]}</b><strong>${m[0]}</strong><small>${m[2]}</small></button>`).join('')}</div><div class="communication-tips"><strong>我们可以这样配合：</strong><span>修改订单请在屏幕确认</span><span>需要帮助请点需求卡，不必提高音量</span><span>咖啡师的回应会以大字显示</span></div><button class="step-action" data-action="order">我知道了，开始点单</button></section>`}
-
-function order(){if(state.communication!=='点击卡片')return freeOrder();const cats=[...new Set(menu.map(x=>x.category))];const items=menu.filter(x=>x.category===state.category);return `<div class="page-head"><div><div class="eyebrow">第一步 · 选择商品</div><h2>Ether Coffee 菜单</h2><p class="lead">你正在使用「${state.communication}」。所有修改会变成视觉卡片直达咖啡师，不需要隔空呼喊。</p></div>${progress(2)}</div><div class="access-strip"><span>👀 咖啡师将看到每一项修改</span><button data-action="connect">切换表达方式</button></div><div class="category-tabs">${cats.map(c=>`<button class="${c===state.category?'active':''}" data-category="${c}">${c}</button>`).join('')}</div><div class="menu-grid">${items.map(p=>`<button class="menu-card" data-product="${p.id}"><span class="menu-icon">${p.accent}</span><span class="menu-info"><strong>${p.name}</strong><small>${p.desc}</small><span class="menu-meta">${p.food?'现烤点心':p.temps.join('/')} ${p.noCoffee?' · 无咖啡因':''}</span></span><b>${money(p.price)}</b></button>`).join('')}</div>${cartBar()}`}
-function cartBar(){if(!state.cart.length)return '';return `<button class="cart-bar" data-action="cart"><span><b>${state.cart.reduce((n,x)=>n+x.qty,0)}</b> 已选商品</span><strong>${money(total())} · 查看订单</strong></button>`}
-
-
-function freeOrder(){
-  const voice=state.communication==='语音转文字';
-  const voiceControl=state.transcribing
-    ? `<div class="big-mic processing"><span class="spinner"></span><strong>正在本机转写…</strong><small>正在将本次主动录制的短音频转换为中文字幕</small></div>`
-    : `<button class="big-mic ${state.recording?'recording':''}" data-action="capture-voice">${state.recording?'⏹️':'🎙️'}<strong>${state.recording?'点击结束并转写':(state.freeInput?'重新录音':'开始录音')}</strong><small>${state.recording?'正在录音，请自然说出完整需求':'录音将安全发送至语音转写服务，不会持续监听'}</small></button>`;
-  return `<div class="page-head"><div><div class="eyebrow">${voice?'语音点单':'文字点单'} · 对话会变成视觉订单</div><h2>${voice?'直接说出你想喝的':'把你的需求打出来'}</h2><p class="lead">例如：我要两杯冰拿铁，少冰少糖，换燕麦奶，其中一杯加浓，打包，我比较赶时间。</p></div>${progress(2)}</div><div class="mode-switch"><button data-action="connect">切换表达方式</button><span>当前方式：${state.communication}</span></div><section class="panel free-order"><div class="conversation-preview"><div class="speaker customer"><small>顾客</small><p data-live-input="customer">${state.freeInput?esc(state.freeInput):'你的表达会出现在这里，并同步变成咖啡师可见的字幕。'}</p></div><div class="speaker barista"><small>咖啡师看到</small><p data-live-input="barista">${state.freeInput?esc(state.freeInput):'等待顾客表达……'}</p></div></div>${voice?`${voiceControl}${state.asrError?`<div class="asr-error">${esc(state.asrError)}</div>`:''}`:`<label class="field"><strong>输入点单或其他需求</strong><textarea data-free-input placeholder="例如：一杯冰拿铁，少冰，换燕麦奶……">${esc(state.freeInput)}</textarea></label>`}${state.parseError?`<div class="asr-error">${esc(state.parseError)}</div>`:''}<button class="step-action" data-action="understand" ${state.freeInput&&!state.recording&&!state.transcribing?'':'disabled'}>AI 整理为订单，请双方确认</button><div class="example-chips"><span>备用体验文本：</span><button data-example="一杯冰拿铁，少冰少糖，换燕麦奶，加一份浓缩，打包，我想知道等多久">复杂点单</button><button data-example="我想要不含咖啡的热饮，不要太甜">描述偏好</button><button data-example="不好意思，我想把刚才那杯改成少冰">临时改单</button></div></section>`
+function render(){
+  app.innerHTML = ({home:renderHome,dashboard:renderDashboard,existing:renderExisting,communicate:renderCommunicate,menu:renderMenu,confirm:renderConfirm})[state.screen]();
+  renderModal();
+  document.body.classList.toggle('modal-open',!!state.modal);
+  if(state.toast){clearTimeout(render.toastTimer);render.toastTimer=setTimeout(()=>{state.toast='';render()},2200)}
 }
 
-async function toggleRecording(){
-  if(state.transcribing)return;
-  if(state.recording){
-    state.recorder?.stop();
-    state.stream?.getTracks().forEach(track=>track.stop());
-    return;
-  }
-  if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){
-    state.asrError='当前浏览器不支持录音，请使用最新版 Chrome 或 Safari。';render();return;
-  }
-  try{
-    const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,channelCount:1}});
-    const preferred=['audio/webm;codecs=opus','audio/webm','audio/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';
-    const recorder=new MediaRecorder(stream,preferred?{mimeType:preferred}:undefined);
-    state.stream=stream;state.recorder=recorder;state.chunks=[];state.asrError='';state.freeInput='';
-    recorder.ondataavailable=e=>{if(e.data.size)state.chunks.push(e.data)};
-    recorder.onstop=async()=>{
-      const type=recorder.mimeType||'audio/webm';
-      const blob=new Blob(state.chunks,{type});
-      state.recording=false;state.transcribing=true;render();
-      try{
-        const ext=type.includes('mp4')?'m4a':type.includes('ogg')?'ogg':'webm';
-        const form=new FormData();form.append('audio',blob,`wemeet-recording.${ext}`);
-        const response=await fetch('/api/transcribe',{method:'POST',body:form,headers:{'X-WeMeet-Consent':'user-initiated'}});
-        const data=await response.json().catch(()=>({}));
-        if(!response.ok||!data.ok)throw new Error(data.error||'transcription_failed');
-        state.freeInput=(data.text||'').trim();
-        if(!state.freeInput)state.asrError='没有识别到清晰语音，请靠近设备后重试。';
-      }catch(error){
-        state.asrError='转写失败，请检查网络或稍后重试；也可以切换到文字输入。';
-      }finally{
-        state.transcribing=false;state.recorder=null;state.stream=null;state.chunks=[];render();
-      }
-    };
-    recorder.start(250);state.recording=true;render();
-  }catch(error){state.asrError='无法使用麦克风，请允许浏览器访问麦克风后重试。';render()}
+function renderHome(){return `
+  <section class="home-hero">
+    <div class="hero-copy">
+      <div class="eyebrow">ETHER COFFEE × 会意 2.0</div>
+      <h1>让订单看得见，<br><span>让交流自然发生。</span></h1>
+      <p class="lead">会意是叠加在现有点单流程上的无障碍工作层，帮助听障咖啡师独立接单、确认变化、回应顾客。</p>
+      <div class="principle"><b>不需要说明自己的障碍</b><span>直接选择现在最方便的沟通方式，随时可以切换。</span></div>
+    </div>
+    <div class="home-actions">
+      <button class="journey-card primary" data-action="existing">
+        <span class="journey-icon">📱</span><span><small>顾客已完成点单</small><strong>我已经扫码下单</strong><em>查看订单 · 追加需求 · 取餐提醒</em></span><b>→</b>
+      </button>
+      <button class="journey-card" data-action="communicate">
+        <span class="journey-icon">💬</span><span><small>需要面对面交流</small><strong>我需要沟通点单</strong><em>点选 · 语音字幕 · 打字 · 手写</em></span><b>→</b>
+      </button>
+      <button class="staff-entry" data-action="dashboard"><span>👀</span><span><b>进入咖啡师工作台</b><small>订单、改单、沟通与取餐</small></span><b>3</b></button>
+    </div>
+  </section>
+  <section class="value-strip">
+    <div><b>01</b><span>现有系统继续用</span></div><div><b>02</b><span>关键信息视觉化</span></div><div><b>03</b><span>沟通失败有退路</span></div>
+  </section>`}
+
+function renderExisting(){return `
+  <section class="page-head"><button class="back" data-action="home">←</button><div><div class="eyebrow">已扫码下单</div><h2>把订单交给会意</h2><p>第一阶段不读取美团账号。请选择一种安全、简单的方式让咖啡师看到订单。</p></div></section>
+  <div class="import-grid">
+    <button class="import-card featured" data-action="demo-import"><span>⚡</span><b>模拟导入美团订单</b><small>使用脱敏样例，体验咖啡师接单流程</small><em>比赛演示推荐</em></button>
+    <button class="import-card" data-action="manual-import"><span>⌨️</span><b>手动输入订单</b><small>只填写商品、规格和备注</small></button>
+    <button class="import-card" data-action="ocr-placeholder"><span>📷</span><b>拍小票 / 截图</b><small>OCR 识别后由咖啡师确认</small><em>下一阶段</em></button>
+  </div>
+  <div class="privacy-note">🔒 会意只需要商品、规格、备注和状态，不需要顾客姓名、手机号或地址。</div>`}
+
+function renderCommunicate(){return `
+  <section class="page-head"><button class="back" data-action="home">←</button><div><div class="eyebrow">沟通点单</div><h2>你想怎样表达？</h2><p>随时可以切换，不需要解释原因。</p></div></section>
+  <div class="mode-grid">
+    <button class="mode-card" data-action="open-menu"><span>👆</span><b>点选菜单</b><small>直接选择商品与规格</small></button>
+    <button class="mode-card" data-action="voice-mode"><span>🎙️</span><b>语音转字幕</b><small>说话后双方一起确认文字</small></button>
+    <button class="mode-card" data-action="text-mode"><span>⌨️</span><b>直接打字</b><small>输入需求并整理为候选订单</small></button>
+    <button class="mode-card" data-action="open-writing"><span>✍️</span><b>双向手写</b><small>面对面写给对方看</small></button>
+  </div>
+  <button class="sign-invite" data-action="open-sign"><span>🤟</span><span><b>和咖啡师学一句手语</b><small>这是轻松的互动，不影响点单</small></span><b>→</b></button>`}
+
+function renderMenu(){
+ const cats=['全部','咖啡','非咖','烘焙'];
+ const items=menu.filter(x=>state.category==='全部'||x.category===state.category);
+ return `<section class="page-head compact-head"><button class="back" data-action="communicate">←</button><div><div class="eyebrow">ETHER MENU</div><h2>点选菜单</h2></div></section>
+ <div class="category-tabs">${cats.map(c=>`<button class="${state.category===c?'active':''}" data-category="${c}">${c}</button>`).join('')}</div>
+ <div class="menu-grid">${items.map(x=>`<button class="menu-card" data-product="${x.id}"><span>${x.emoji}</span><div><b>${x.name}</b><small>${x.defaults.join(' · ')}</small></div><strong>${money(x.price)}</strong></button>`).join('')}</div>`
 }
 
-const productAliases = [
-  ['matcha-latte',['抹茶拿铁','抹茶咖啡']],
-  ['matcha-milk',['抹茶鲜奶','抹茶牛奶','不含咖啡的抹茶','无咖啡因抹茶']],
-  ['osmanthus',['桂花酒酿拿铁','桂花拿铁','酒酿拿铁']],
-  ['coconut-latte',['厚椰拿铁','椰乳拿铁']],
-  ['oat-latte',['燕麦拿铁','燕麦奶拿铁']],
-  ['taro-dirty',['香芋dirty','香芋 dirty','香芋迪提','香芋迪缇']],
-  ['elderberry',['接骨木气泡美式','接骨木美式']],
-  ['green-coconut',['青椰美式','椰青美式']],
-  ['grape',['黑葡萄美式','葡萄美式']],
-  ['salary',['升薪美式','生薪美式','经典美式']],
-  ['soe',['耶加雪菲soe美式','耶加雪菲美式','soe美式','手冲美式']],
-  ['salt-mocha',['咸摩卡','海盐摩卡']],
-  ['dirty',['dirty','迪提','迪缇']],
-  ['lemon',['柠香冰咖','柠檬冰咖']],
-  ['pomelo',['腌渍柚子樱花茶','柚子樱花茶','柚子茶']],
-  ['peach-tea',['白桃乌龙茶','白桃乌龙']],
-  ['brown-rose',['古法黑糖玫瑰茶','黑糖玫瑰茶','玫瑰茶']],
-  ['temper-peach',['脾气水蜜桃','水蜜桃气泡水','水蜜桃苏打']],
-  ['passion-plum',['百香话梅苏打','百香果话梅苏打','话梅苏打']],
-  ['strawberry',['草莓苏打','草莓气泡水']],
-  ['kiwi',['奇亚籽可颂','奇亚籽羊角']],
-  ['choco',['巧克力双色羊角','巧克力羊角','巧克力可颂']],
-  ['bbq',['叉烧可颂','叉烧羊角']],
-  ['butter',['招牌黄油可颂','黄油可颂','黄油羊角']],
-  ['latte',['拿铁']],
-  ['soe',['美式']]
-];
+function renderConfirm(){
+ const p=state.selected;
+ if(!p){state.screen='communicate';return renderCommunicate()}
+ return `<section class="page-head compact-head"><button class="back" data-action="communicate">←</button><div><div class="eyebrow">双方确认</div><h2>订单整理好了</h2></div></section>
+ <div class="confirm-layout"><div class="order-paper"><div class="paper-top"><span>ETHER COFFEE</span><b>候选订单</b></div><div class="confirm-product"><span>${p.emoji}</span><div><h3>${p.name} × 1</h3><p>${esc(p.spec||p.defaults.join(' · '))}</p></div><b>${money(p.price)}</b></div>${state.freeText?`<div class="raw-text"><small>顾客原始表达</small><p>“${esc(state.freeText)}”</p></div>`:''}<div class="double-check">👀 请顾客和咖啡师一起确认，AI 不会替双方做决定。</div></div>
+ <div class="confirm-actions"><button class="secondary" data-action="communicate">返回修改</button><button class="primary-button" data-action="submit-order">双方确认，发送到工作台</button></div></div>`
+}
+
+function renderDashboard(){
+ const active=state.activeOrder?state.orders.find(o=>o.id===state.activeOrder):null;
+ return `<section class="dashboard-head"><div><div class="eyebrow">听障咖啡师工作台</div><h2>下午好，星星</h2><p>重要变化会用文字、颜色和震动提示，不只依靠声音。</p></div><div class="shift-state"><i></i> 服务中</div></section>
+ <div class="dashboard-tools"><button data-action="demo-import">＋ 模拟导入订单</button><button data-action="open-replies">💬 快捷回复</button><button data-action="open-writing">✍️ 手写板</button><button data-action="open-help">🫶 沟通求助</button></div>
+ <div class="order-board">${['new','making','ready'].map(status=>renderColumn(status)).join('')}</div>
+ ${active?renderOrderDrawer(active):''}`
+}
+
+function renderColumn(status){
+ const labels={new:['待接单','先看备注与变化'],making:['制作中','保持追加需求可见'],ready:['可取餐','用视觉方式通知']};
+ const orders=state.orders.filter(o=>o.status===status);
+ return `<section class="order-column"><header><div><h3>${labels[status][0]} <b>${orders.length}</b></h3><p>${labels[status][1]}</p></div></header><div class="order-list">${orders.length?orders.map(renderOrderCard).join(''):'<div class="empty-state">当前没有订单</div>'}</div></section>`
+}
+
+function renderOrderCard(o){return `<button class="order-card ${o.alert?'has-alert':''} ${o.changed?'has-change':''}" data-order="${o.id}">
+ <div class="order-meta"><b>#${o.id}</b><span>${o.source}</span><time>${o.time}</time></div>
+ ${o.alert?`<div class="alert-ribbon">● ${o.alert} · 请确认已看到</div>`:''}
+ ${o.items.map(i=>`<div class="order-item"><strong>${i.name} × ${i.qty}</strong><small>${i.spec}</small></div>`).join('')}
+ ${o.note?`<div class="order-note"><b>备注</b>${esc(o.note)}</div>`:''}
+ ${o.changed?`<div class="order-change"><b>订单有修改</b><span>${esc(o.changed)}</span></div>`:''}
+ ${o.messages.length?`<div class="message-count">💬 ${o.messages.length} 条追加沟通</div>`:''}
+ <footer><span>查看详情</span><b>→</b></footer></button>`}
+
+function renderOrderDrawer(o){
+ const next={new:['确认接单','making'],making:['制作完成','ready'],ready:['确认取餐','done']}[o.status];
+ return `<div class="drawer-backdrop" data-action="close-order"></div><aside class="order-drawer"><button class="drawer-close" data-action="close-order">×</button><div class="eyebrow">订单 #${o.id}</div><h2>${statusLabel[o.status]}</h2>
+ <div class="drawer-source">${o.source} · ${o.time}</div>${o.items.map(i=>`<div class="drawer-item"><b>${i.name} × ${i.qty}</b><span>${i.spec}</span></div>`).join('')}
+ ${o.note?`<div class="drawer-block important"><small>顾客备注</small><b>${esc(o.note)}</b></div>`:''}${o.changed?`<div class="drawer-block change"><small>刚刚修改</small><b>${esc(o.changed)}</b></div>`:''}
+ <div class="conversation"><h3>与顾客沟通</h3>${o.messages.map(m=>`<p>${esc(m)}</p>`).join('')||'<p class="muted">还没有追加消息</p>'}<div class="message-compose"><input id="order-message" value="${esc(state.draftMessage)}" placeholder="输入给顾客的文字"/><button data-action="send-message">发送</button></div></div>
+ <div class="drawer-quick">${quickReplies.slice(0,4).map(q=>`<button data-quick="${q}">${q}</button>`).join('')}</div>
+ <button class="primary-button full" data-status="${next?.[1]||''}" ${next?'':'disabled'}>${next?.[0]||'订单已完成'}</button></aside>`
+}
+
+function renderModal(){
+ let html='';
+ if(state.modal==='input') html=renderInputModal();
+ if(state.modal==='toolbox') html=renderToolbox();
+ if(state.modal==='writing') html=renderWriting();
+ if(state.modal==='bigtext') html=renderBigText();
+ if(state.modal==='sign') html=renderSign();
+ if(state.modal==='replies') html=renderReplies();
+ if(state.modal==='help') html=renderHelp();
+ if(state.modal==='manual') html=renderManual();
+ const old=document.querySelector('#modal-root');if(old)old.remove();
+ if(html){const root=document.createElement('div');root.id='modal-root';root.innerHTML=html;document.body.appendChild(root);if(state.modal==='writing')setTimeout(initCanvas,0)}
+ const oldToast=document.querySelector('.toast');if(oldToast)oldToast.remove();
+ if(state.toast){const t=document.createElement('div');t.className='toast';t.textContent=state.toast;document.body.appendChild(t)}
+}
+
+const modalShell=(title,body,wide=false)=>`<div class="modal-backdrop" data-action="close-modal"></div><section class="modal ${wide?'wide':''}" role="dialog" aria-modal="true"><header><div><div class="eyebrow">无障碍沟通</div><h2>${title}</h2></div><button data-action="close-modal" aria-label="关闭">×</button></header>${body}</section>`;
+
+function renderInputModal(){return modalShell(state.inputKind==='voice'?'语音转字幕':'直接输入文字',`
+ <div class="live-caption"><small>双方都能看到的文字</small><textarea id="free-text" placeholder="例如：一杯黑葡萄美式，少冰少糖，打包带走">${esc(state.freeText)}</textarea></div>
+ ${state.parseError?`<div class="error-box">${esc(state.parseError)}</div>`:''}
+ ${state.inputKind==='voice'?`<button class="record-button ${state.recording?'recording':''}" data-action="record">${state.transcribing?'正在转写…':state.recording?'■ 结束录音':'● 开始录音'}</button><p class="modal-tip">录音只在你主动操作后上传用于转写，不在浏览器中长期保存。</p>`:''}
+ <div class="modal-actions"><button class="secondary" data-action="open-writing">改用手写</button><button class="primary-button" data-action="parse-order">整理为候选订单</button></div>`)}
+
+function renderToolbox(){return modalShell('选择现在最方便的方式',`<p class="modal-lead">不需要解释原因，任何时候都可以切换。</p><div class="tool-grid"><button data-action="text-mode"><span>⌨️</span><b>文字输入</b></button><button data-action="voice-mode"><span>🎙️</span><b>语音字幕</b></button><button data-action="open-writing"><span>✍️</span><b>双向手写</b></button><button data-action="open-bigtext"><span>🔤</span><b>全屏大字</b></button><button data-action="open-replies"><span>💬</span><b>快捷回复</b></button><button data-action="open-help"><span>🫶</span><b>沟通求助</b></button></div><button class="sign-invite compact-sign" data-action="open-sign"><span>🤟</span><span><b>和咖啡师学一句手语</b><small>友好互动，不用于处理订单</small></span><b>→</b></button>`)}
+
+function renderWriting(){return modalShell('双向手写板',`<div class="writer-toggle"><button class="${state.writer==='customer'?'active':''}" data-writer="customer">顾客写给咖啡师</button><button class="${state.writer==='barista'?'active':''}" data-writer="barista">咖啡师写给顾客</button></div><div class="canvas-wrap"><canvas id="write-canvas"></canvas><span>请在这里写字或画图</span></div><div class="modal-actions"><button class="secondary" data-action="clear-canvas">清屏</button><button class="secondary" data-action="open-bigtext">改用大字</button><button class="primary-button" data-action="writing-done">写好了，给对方看</button></div>`,true)}
+
+function renderBigText(){return modalShell('全屏大字',`<textarea id="big-text-input" class="big-input" placeholder="输入一句话">${esc(state.bigText)}</textarea><div class="phrase-row">${['请稍等','请写下来','已经售罄','饮品做好了'].map(x=>`<button data-big="${x}">${x}</button>`).join('')}</div><button class="primary-button full" data-action="show-bigtext">全屏展示给对方</button>`)}
+
+function renderSign(){
+ const c=signCards[state.signIndex];
+ return modalShell('和咖啡师学一句手语',`<div class="sign-note">这是人与人的轻松互动，不用于订单确认或异常处理。</div><div class="sign-card"><span class="sign-emoji">${c.emoji}</span><small>今天的一句</small><h2>${c.word}</h2><p>${c.hint}</p><div class="sign-demo"><span>🤲</span><div><b>请咖啡师现场示范</b><small>看懂文字后，跟着咖啡师一起比划</small></div></div></div><div class="sign-actions"><button class="secondary" data-action="next-sign">换一句</button><button class="primary-button" data-action="try-sign">${state.signStage==='try'?'我学会了':'我来试试看'}</button></div>${state.signStage==='try'?'<div class="barista-feedback">咖啡师：我再慢慢示范一次，你跟着我就好 😊</div>':''}`)}
+
+function renderReplies(){return modalShell('咖啡师快捷回复',`<p class="modal-lead">点击一句话，可选择全屏展示给顾客。</p><div class="reply-list">${quickReplies.map(x=>`<button data-reply="${x}"><span>${x}</span><b>显示 →</b></button>`).join('')}</div>`)}
+function renderHelp(){return modalShell('沟通遇到困难',`<p class="modal-lead">不是谁做错了。换一种方式继续就好。</p><div class="help-grid"><button data-action="text-mode">⌨️ 换成文字</button><button data-action="open-writing">✍️ 使用手写板</button><button data-action="open-bigtext">🔤 全屏大字</button><button data-action="voice-mode">🎙️ 再说一次</button><button data-action="ask-slow">🐢 请放慢表达</button><button data-action="ask-colleague">🫶 请同事协助</button></div>`)}
+function renderManual(){return modalShell('手动录入现有订单',`<label class="field">商品名称<input id="manual-product" placeholder="例如：厚椰拿铁"/></label><label class="field">规格<input id="manual-spec" placeholder="例如：冷、少冰、不另外加糖"/></label><label class="field">备注<textarea id="manual-note" placeholder="例如：打包带走"></textarea></label><button class="primary-button full" data-action="save-manual">发送到咖啡师工作台</button>`)}
+
 function detectProduct(text){
-  const normalized=text.toLowerCase().replace(/[\s·，。,.！？!?]/g,'');
-  for(const [id,aliases] of productAliases){if(aliases.some(alias=>normalized.includes(alias.toLowerCase().replace(/\s/g,''))))return product(id)}
-  if(/不含咖啡|无咖啡因/.test(normalized))return null;
-  return null;
-}
-function parseFreeOrder(){
-  const t=state.freeInput.trim(),p=detectProduct(t);
-  state.parseError='';
-  if(!p){state.parseError='没有识别到菜单中的具体商品，请说出完整名称（例如“黑葡萄美式”或“白桃乌龙茶”），也可以切换到点击卡片选择。';render();return false}
-  const item=makeDraft(p);
-  if(!p.food&&p.temps.includes('冷')&&(t.includes('冰')||t.includes('冷')))item.temp='冷';
-  if(!p.food&&t.includes('热')&&p.temps.includes('热'))item.temp='热';
-  if(t.includes('少冰'))item.ice='少冰';else if(t.includes('去冰')||t.includes('不要冰'))item.ice='去冰';
-  if(t.includes('少糖')||t.includes('不要太甜'))item.sugar='少糖';
-  if(t.includes('不加糖')||t.includes('无糖')||t.includes('不要糖'))item.sugar='不另外加糖';
-  if(p.milk&&t.includes('燕麦')&&p.id!=='oat-latte')item.milk='燕麦奶 +4';
-  if(p.milk&&t.includes('厚椰')&&p.id!=='coconut-latte')item.milk='厚椰乳';
-  if(!p.food&&!p.noCoffee&&(t.includes('加浓')||t.includes('加一份浓缩')))item.shots='加一份浓缩 +4';
-  const m=t.match(/[两二2]杯/);
-  if(m&&t.includes('其中一杯')&&item.shots==='加一份浓缩 +4'){state.cart=[{...item,qty:1,shots:'标准浓度'},{...item,qty:1}]}else{if(m)item.qty=2;state.cart=[item]}
-  if(t.includes('打包')||t.includes('带走'))state.service.pickup='打包带走';
-  if(t.includes('赶时间')||t.includes('着急'))state.service.urgency='比较赶时间';else if(t.includes('等多久')||t.includes('等待'))state.service.urgency='想知道等待时间';
-  state.inputResult=true;state.screen='confirm';return true
+ const t=text.toLowerCase().replace(/[\s，。,.！？!?]/g,'');
+ const aliases=[['coconut-latte',['厚椰拿铁','椰乳拿铁']],['oat-latte',['燕麦拿铁','燕麦奶拿铁']],['matcha-milk',['抹茶鲜奶','抹茶牛奶','无咖啡因抹茶']],['grape',['黑葡萄美式','葡萄美式']],['salary',['升薪美式','经典美式']],['peach-tea',['白桃乌龙茶','白桃乌龙']],['strawberry',['草莓苏打','草莓气泡水']],['butter',['招牌黄油可颂','黄油可颂']],['bbq',['叉烧可颂']],['latte',['拿铁']]];
+ for(const [id,words] of aliases)if(words.some(w=>t.includes(w)))return product(id);
+ return null;
 }
 
-function configure(){const p=product(state.draft.id),d=state.draft;const option=(key,title,arr)=>`<div class="option-group"><h3>${title}</h3><div class="option-row">${arr.map(x=>`<button class="option ${d[key]===x?'selected':''}" data-option="${key}:${x}">${x}</button>`).join('')}</div></div>`;return `<div class="page-head"><div><div class="eyebrow">配置商品</div><h2>${p.accent} ${p.name}</h2><p class="lead">${p.desc} · 基础价 ${money(p.price)}</p></div>${progress(2)}</div><div class="access-strip"><span>每个选择都会以大字和颜色变化显示给咖啡师</span><span>当前：${state.communication}</span></div><section class="panel config-panel">${p.food?'':`${option('temp','温度',p.temps)}${d.temp==='冷'&&p.id!=='dirty'&&p.id!=='taro-dirty'?option('ice','冰量',drinkOptions.ice):''}${option('sugar','甜度',drinkOptions.sugar)}${p.milk?option('milk','奶基底',drinkOptions.milk):''}${!p.noCoffee?option('shots','咖啡浓度',drinkOptions.shots):''}`}<div class="option-group"><h3>数量</h3><div class="quantity"><button data-qty="-1">−</button><strong>${d.qty}</strong><button data-qty="1">＋</button></div></div><label class="field"><strong>这杯的补充需求（选填）</strong><input data-item-note value="${esc(d.note)}" placeholder="例如：分开装、不要吸管" maxlength="40"></label><div class="action-row"><button class="primary" data-action="save-item">${state.editing===null?'加入订单':'保存修改'} · ${money(itemPrice(d))}</button><button class="ghost" data-action="order">返回菜单</button></div></section>`}
+function parseOrder(){
+ const box=document.querySelector('#free-text');if(box)state.freeText=box.value.trim();
+ const p=detectProduct(state.freeText);state.parseError='';
+ if(!p){state.parseError='没有识别到明确商品。请说出完整名称，或改用点选菜单。';render();return}
+ let specs=[...p.defaults];const t=state.freeText;
+ if(t.includes('少冰'))specs=specs.map(x=>x.includes('冰')?'少冰':x);if(t.includes('去冰')||t.includes('不要冰'))specs=specs.map(x=>x.includes('冰')?'去冰':x);
+ if(t.includes('少糖'))specs=specs.map(x=>x.includes('糖')?'少糖':x);if(t.includes('无糖')||t.includes('不加糖'))specs=specs.map(x=>x.includes('糖')?'不另外加糖':x);
+ state.selected={...p,spec:specs.join(' · ')};state.modal=null;state.screen='confirm';render();
+}
 
-function cart(){return `<div class="page-head"><div><div class="eyebrow">第三步 · 确认订单</div><h2>看看有没有遗漏</h2><p class="lead">所有修改都会清楚地显示给咖啡师。</p></div>${progress(3)}</div><div class="access-strip important"><span>🔔 提交后若要改单，请使用「服务需求卡」，咖啡师会收到视觉提醒</span></div><div class="checkout-layout"><section class="panel"><div class="cart-list">${state.cart.map((i,n)=>{const p=product(i.id);return `<div class="cart-item"><div class="menu-icon">${p.accent}</div><div><strong>${p.name}</strong><small>${itemSummary(i)}</small>${i.note?`<small>备注：${esc(i.note)}</small>`:''}</div><b>${money(itemPrice(i))}</b><div class="item-actions"><button data-edit="${n}">修改</button><button data-remove="${n}">删除</button></div></div>`}).join('')}</div><button class="add-more" data-action="order">＋ 继续添加商品</button></section><aside class="panel"><div class="option-group"><h3>取餐方式</h3><div class="option-row">${['店内享用','打包带走'].map(x=>`<button class="option ${state.service.pickup===x?'selected':''}" data-service="pickup:${x}">${x}</button>`).join('')}</div></div><div class="option-group"><h3>时间需求</h3><div class="option-row">${['不着急','想知道等待时间','比较赶时间'].map(x=>`<button class="option ${state.service.urgency===x?'selected':''}" data-service="urgency:${x}">${x}</button>`).join('')}</div></div><label class="field"><strong>整单补充需求（选填）</strong><textarea data-service-note placeholder="例如：其中一杯先做">${esc(state.service.note)}</textarea></label><div class="total"><span>合计</span><strong>${money(total())}</strong></div><button class="step-action" data-action="confirm-order">确认并发给咖啡师</button></aside></div>`}
+async function toggleRecord(){
+ if(state.recording){state.recorder.stop();state.stream?.getTracks().forEach(t=>t.stop());state.recording=false;state.transcribing=true;render();return}
+ try{
+  const stream=await navigator.mediaDevices.getUserMedia({audio:true});state.stream=stream;state.chunks=[];
+  const recorder=new MediaRecorder(stream);state.recorder=recorder;recorder.ondataavailable=e=>{if(e.data.size)state.chunks.push(e.data)};
+  recorder.onstop=async()=>{try{const blob=new Blob(state.chunks,{type:recorder.mimeType||'audio/webm'});const form=new FormData();form.append('audio',blob,'wemeet-recording.webm');const r=await fetch('/api/transcribe',{method:'POST',body:form,headers:{'X-WeMeet-Consent':'user-initiated'}});const data=await r.json();if(!r.ok||!data.ok)throw new Error();state.freeText=data.text||'';state.transcribing=false;state.modal='input';render()}catch(e){state.transcribing=false;state.toast='转写失败，请改用文字或手写';render()}};
+  recorder.start();state.recording=true;render();
+ }catch(e){state.toast='无法使用麦克风，请检查权限或改用文字';render()}
+}
 
-function confirm(){return `<div class="page-head"><div><div class="eyebrow">顾客确认</div><h2>最终订单是这样，对吗？</h2><p class="lead">确认后咖啡师才开始制作。</p></div>${progress(3)}</div><div class="confirm-protocol"><b>双方确认协议</b><span>① 顾客确认文字</span><span>② 咖啡师确认已看见</span><span>③ 再开始制作</span></div><section class="panel order-card"><div class="order-title"><strong>订单 #018</strong><span class="tag">等待顾客确认</span></div><div class="order-body">${state.cart.map(i=>{const p=product(i.id);return `<div class="confirm-item"><div><strong>${p.name} × ${i.qty}</strong><p>${itemSummary(i)}</p></div><b>${money(itemPrice(i))}</b>${meaningfulChanges(i).length?`<div class="change-list">${meaningfulChanges(i).map(x=>`<span>${x[0]}：<s>${x[2]||'默认'}</s> → <strong>${x[1]}</strong></span>`).join('')}</div>`:''}</div>`}).join('')}<div class="order-line"><span>取餐</span><strong>${state.service.pickup}</strong></div><div class="order-line"><span>时间需求</span><strong>${state.service.urgency}</strong></div>${state.service.note?`<div class="order-line"><span>补充需求</span><strong>${esc(state.service.note)}</strong></div>`:''}<div class="total"><span>合计</span><strong>${money(total())}</strong></div><div class="action-row"><button class="primary" data-action="send-order">确认无误，发给咖啡师</button><button class="ghost" data-action="cart">返回修改</button></div></div></section>`}
+function addDemoOrder(){
+ const n=state.orders.find(o=>o.id==='A19');if(!n)state.orders.unshift({id:'A19',source:'美团订单 · 模拟',time:new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}),status:'new',items:[{name:'燕麦拿铁',qty:1,spec:'冷 · 少冰 · 燕麦奶'}],note:'不要吸管，到店自取',alert:'新订单',changed:null,messages:[]});
+ state.screen='dashboard';state.modal=null;state.toast='新订单已导入，工作台已发出视觉提醒';if(n)state.activeOrder='A19';navigator.vibrate?.([120,80,120]);render();
+}
 
-function partner(){if(!state.cart.length){state.cart=[{id:'latte',temp:'冷',ice:'少冰',sugar:'少糖',milk:'燕麦奶 +4',shots:'加一份浓缩 +4',qty:2,note:'其中一杯不要吸管'}];state.service={pickup:'打包带走',urgency:'比较赶时间',note:'想知道预计等待时间'}}const allChanges=state.cart.flatMap(i=>meaningfulChanges(i));const steps=['确认订单与修改项',`准备 ${state.cart.reduce((n,x)=>n+x.qty,0)} 件商品`,'向顾客展示预计等待时间','完成后视觉提示取餐'];return `<div class="page-head"><div><div class="eyebrow">咖啡师端 · 新订单 #018</div><h2>${state.cart.length} 种商品，${allChanges.length} 项个性配置</h2><p class="lead">声音已转成视觉任务：新消息闪动提醒、改动前后对比、顾客状态与快速大字回应都在同一屏。</p></div>${progress(4)}</div><div class="partner-layout"><section class="panel"><div class="alert">🔔 新订单 · ${state.service.pickup} · ${state.service.urgency}</div>${state.cart.map(i=>{const p=product(i.id);return `<div class="barista-ticket"><header><strong>${p.accent} ${p.name} × ${i.qty}</strong><b>${money(itemPrice(i))}</b></header><div class="ticket-options">${[i.temp,i.ice,i.sugar,i.milk,i.shots].filter(Boolean).map(x=>`<span>${x}</span>`).join('')}</div>${meaningfulChanges(i).length?`<div class="change-list">${meaningfulChanges(i).map(x=>`<span>${x[0]}：<s>${x[2]||'默认'}</s> → <strong>${x[1]}</strong></span>`).join('')}</div>`:''}${i.note?`<p class="ticket-note">备注：${esc(i.note)}</p>`:''}</div>`}).join('')}<div class="steps">${steps.map((s,i)=>`<div class="step ${i<state.partnerStep?'done':''} ${i===state.partnerStep?'current':''}"><span class="step-num">${i<state.partnerStep?'✓':i+1}</span><strong>${s}</strong></div>`).join('')}</div><button class="step-action" data-action="next-step">${state.partnerStep>=steps.length-1?'订单制作完成':'完成这一步'}</button></section><aside class="panel"><div class="eyebrow">沟通建议</div><h3>${state.service.urgency==='比较赶时间'?'顾客比较赶时间':'向顾客同步进度'}</h3><p class="lead">选择一句话，会以大字展示给顾客。</p><div class="quick-replies">${['订单修改已确认','预计需要 8 分钟','请给我一点时间','我想邀请同事一起帮忙'].map(t=>`<button data-reply="${t}">${state.reply===t?'✓ ':''}${t}</button>`).join('')}</div>${state.reply?`<div class="caption customer-display">${state.reply}</div>`:''}<button class="primary full" data-action="service">进入制作中的双向沟通</button><button class="ghost full" data-action="cart">顾客需要再次改单</button></aside></div>`}
+function initCanvas(){
+ const canvas=document.querySelector('#write-canvas');if(!canvas)return;const box=canvas.parentElement.getBoundingClientRect();canvas.width=box.width*devicePixelRatio;canvas.height=300*devicePixelRatio;canvas.style.height='300px';const ctx=canvas.getContext('2d');ctx.scale(devicePixelRatio,devicePixelRatio);ctx.lineWidth=5;ctx.lineCap='round';ctx.strokeStyle='#25332d';let drawing=false;
+ const pos=e=>{const r=canvas.getBoundingClientRect(),p=e.touches?.[0]||e;return [p.clientX-r.left,p.clientY-r.top]};
+ const start=e=>{drawing=true;ctx.beginPath();ctx.moveTo(...pos(e));e.preventDefault()};const move=e=>{if(!drawing)return;ctx.lineTo(...pos(e));ctx.stroke();e.preventDefault()};const stop=()=>drawing=false;
+ ['mousedown','touchstart'].forEach(x=>canvas.addEventListener(x,start,{passive:false}));['mousemove','touchmove'].forEach(x=>canvas.addEventListener(x,move,{passive:false}));['mouseup','mouseleave','touchend'].forEach(x=>canvas.addEventListener(x,stop));
+}
 
+function handleAction(a,el){
+ const routes={home:'home',existing:'existing',communicate:'communicate',dashboard:'dashboard','open-menu':'menu'};if(routes[a]){state.screen=routes[a];state.modal=null;render();return}
+ if(a==='reset'){Object.assign(state,{screen:'home',modal:null,selected:null,freeText:'',parseError:'',activeOrder:null});render()}
+ if(a==='demo-import')addDemoOrder();
+ if(a==='manual-import'){state.modal='manual';render()}
+ if(a==='ocr-placeholder'){state.toast='OCR 将在下一阶段接入，当前请使用模拟导入';render()}
+ if(a==='voice-mode'||a==='text-mode'){state.inputKind=a==='voice-mode'?'voice':'text';state.modal='input';render()}
+ if(a==='open-toolbox'){state.modal='toolbox';render()}
+ if(a==='open-writing'){state.modal='writing';render()}
+ if(a==='open-bigtext'){state.modal='bigtext';render()}
+ if(a==='open-sign'){state.modal='sign';state.signStage='choose';render()}
+ if(a==='open-replies'){state.modal='replies';render()}
+ if(a==='open-help'){state.modal='help';render()}
+ if(a==='close-modal'){state.modal=null;render()}
+ if(a==='parse-order')parseOrder();
+ if(a==='record')toggleRecord();
+ if(a==='submit-order'){const p=state.selected;state.orders.unshift({id:'A20',source:'店内沟通',time:new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}),status:'new',items:[{name:p.name,qty:1,spec:p.spec||p.defaults.join(' · ')}],note:state.freeText,alert:'双方已确认',changed:null,messages:[]});state.screen='dashboard';state.toast='订单已发送到咖啡师工作台';render()}
+ if(a==='close-order'){state.activeOrder=null;render()}
+ if(a==='send-message'){const input=document.querySelector('#order-message');const o=state.orders.find(x=>x.id===state.activeOrder);if(input?.value.trim()){o.messages.push(`咖啡师 ${new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}：${input.value.trim()}`);state.draftMessage='';state.toast='文字已展示给顾客';render()}}
+ if(a==='clear-canvas'){initCanvas()}
+ if(a==='writing-done'){state.toast=`${state.writer==='customer'?'顾客':'咖啡师'}的手写内容已展示给对方`;state.modal=null;render()}
+ if(a==='show-bigtext'){const input=document.querySelector('#big-text-input');state.bigText=input?.value.trim()||state.bigText;if(state.bigText){document.body.innerHTML=`<button class="big-display" data-return-big><span>${esc(state.bigText)}</span><small>轻触屏幕返回</small></button>`}}
+ if(a==='next-sign'){state.signIndex=(state.signIndex+1)%signCards.length;state.signStage='choose';render()}
+ if(a==='try-sign'){if(state.signStage==='choose'){state.signStage='try';render()}else{state.toast=`今天学会了“${signCards[state.signIndex].word}”`;state.modal=null;render()}}
+ if(a==='ask-slow'){state.bigText='请放慢一点，让我看清楚。';state.modal='bigtext';render()}
+ if(a==='ask-colleague'){state.bigText='沟通暂时遇到困难，我请同事一起协助。';state.modal='bigtext';render()}
+ if(a==='save-manual'){const name=document.querySelector('#manual-product')?.value.trim(),spec=document.querySelector('#manual-spec')?.value.trim(),note=document.querySelector('#manual-note')?.value.trim();if(!name){state.toast='请先填写商品名称';render();return}state.orders.unshift({id:'A21',source:'人工录入',time:new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}),status:'new',items:[{name,qty:1,spec:spec||'待确认'}],note,alert:'新订单',changed:null,messages:[]});state.modal=null;state.screen='dashboard';state.toast='订单已录入工作台';render()}
+}
 
-function service(){const intents=[['询问进度','⏱️','还需要等多久？'],['修改订单','✏️','我想修改刚才的订单'],['需要物品','🧻','我需要纸巾 / 吸管 / 水'],['需要帮助','🙋','我想请你帮忙']];return `<div class="page-head"><div><div class="eyebrow">制作中 · 双向沟通</div><h2>不靠呼喊，也不会错过需求</h2><p class="lead">顾客点击需求卡，咖啡师端立即闪动；咖啡师点击回应，顾客端显示大字。</p></div>${progress(4)}</div><div class="live-service"><section class="panel customer-side"><div class="side-label">顾客手机</div><h3>现在需要什么？</h3><div class="intent-grid">${intents.map(x=>`<button class="intent ${state.serviceIntent===x[0]?'selected':''}" data-intent="${x[0]}|${x[2]}"><b>${x[1]}</b><strong>${x[0]}</strong><small>${x[2]}</small></button>`).join('')}</div>${state.serviceReply?`<div class="customer-reply"><small>咖啡师回复</small><strong>${state.serviceReply}</strong><span>✓ 已收到</span></div>`:`<div class="waiting-card">选择后，请看咖啡师是否确认</div>`}</section><section class="panel barista-side"><div class="side-label">咖啡师屏幕</div>${state.serviceIntent?`<div class="visual-alert"><span>🔔</span><div><small>顾客发来新需求</small><strong>${state.serviceIntent}</strong><p>${state.serviceIntentText}</p></div></div><div class="quick-replies">${['已看见，我来处理','预计还需要 5 分钟','请在屏幕上修改订单','我想邀请同事一起帮忙'].map(t=>`<button data-service-reply="${t}">${state.serviceReply===t?'✓ ':''}${t}</button>`).join('')}</div>`:`<div class="quiet-state"><span>👀</span><strong>正在等待顾客需求</strong><p>新消息会以闪动和振动提醒，不依赖听见呼喊。</p></div>`}<div class="pickup-preview"><small>制作完成后的视觉取餐提醒</small><strong>#018 张先生 · 可以取餐</strong><button data-action="pickup">模拟完成制作</button></div></section></div><div class="action-row"><button class="primary" data-action="feedback">结束体验并反馈</button></div>`}
-
-function feedback(){const row=(k,t,a)=>`<div><strong>${t}</strong><div class="feedback-scale">${a.map((x,i)=>`<button class="${state.feedback[k]===i+1?'selected':''}" data-rate="${k}:${i+1}">${x[0]}<small>${x[1]}</small></button>`).join('')}</div></div>`;return `<div class="page-head"><div><div class="eyebrow">和咖啡师一起完善</div><h2>这次点单好用吗？</h2><p class="lead">你的感受决定下一版怎么改。</p></div></div><section class="panel">${row('clear','订单和配置看得清楚吗？',[['😕','不清楚'],['🙂','还可以'],['😊','很清楚']])}${row('helpful','制作步骤有帮助吗？',[['😕','没帮助'],['🙂','有一点'],['😊','很有帮助']])}${row('pressure','使用时感觉轻松吗？',[['😣','更有压力'],['🙂','差不多'],['😊','更轻松']])}<label><strong>最想改变哪一点？</strong><textarea data-note placeholder="例如：字再大一点、选项太多、修改需要更醒目……">${esc(state.feedback.note)}</textarea></label><div class="action-row"><button class="primary" data-action="submit-feedback">提交本次反馈</button><button class="ghost" data-action="partner-demo">返回体验</button></div></section>`}
-function thanks(){return `<section class="panel success"><div class="success-icon">✓</div><div class="eyebrow">谢谢你的共同设计</div><h2>让工具适合每一种沟通方式。</h2><p class="lead" style="margin:auto">反馈已保存在当前设备，我们会据此调整菜单、配置和提醒方式。</p><div class="action-row" style="justify-content:center"><button class="primary" data-action="reset">重新体验</button></div></section>`}
-function render(){const view={home,connect,order,configure,cart,confirm,partner,service,feedback,thanks}[state.screen];app.innerHTML=view();window.scrollTo({top:0,behavior:'smooth'})}
-function makeDraft(p){return {id:p.id,temp:p.defaults.temp||'',ice:p.defaults.ice||'',sugar:p.defaults.sugar||'',milk:p.defaults.milk||'',shots:p.food||p.noCoffee?'':'标准浓度',qty:1,note:''}}
-
-document.addEventListener('click',e=>{const el=e.target.closest('button');if(!el)return;const {action,category,product:pid,option,qty,edit,remove,service,reply,rate,communication,intent}=el.dataset;
- if(el.dataset.example){state.freeInput=el.dataset.example;render();return}
- if(category){state.category=category;render();return} if(pid){state.editing=null;state.draft=makeDraft(product(pid));state.screen='configure';render();return}
- if(option){const [k,v]=option.split(':');state.draft[k]=v;if(k==='temp'&&v==='热')state.draft.ice='';if(k==='temp'&&v==='冷'&&!state.draft.ice)state.draft.ice='正常冰';render();return}
- if(qty){state.draft.qty=Math.max(1,Math.min(9,state.draft.qty+Number(qty)));render();return}
- if(edit!==undefined){state.editing=Number(edit);state.draft={...state.cart[state.editing]};state.screen='configure';render();return}
- if(remove!==undefined){state.cart.splice(Number(remove),1);state.screen=state.cart.length?'cart':'order';render();return}
- if(service){const [k,v]=service.split(':');state.service[k]=v;render();return}
- if(reply){state.reply=reply;navigator.vibrate?.(80);render();return}
- if(rate){const [k,v]=rate.split(':');state.feedback[k]=Number(v);render();return}
- if(communication){state.communication=communication;render();return}
- if(intent){const [name,text]=intent.split('|');state.serviceIntent=name;state.serviceIntentText=text;state.serviceReply='';navigator.vibrate?.([100,60,100]);render();return}
- if(el.dataset.serviceReply){state.serviceReply=el.dataset.serviceReply;navigator.vibrate?.(80);render();return}
- const screens={connect:'connect',order:'order',cart:'cart','confirm-order':'confirm','send-order':'partner','partner-demo':'partner',service:'service',feedback:'feedback',home:'home'};
- if(screens[action]){state.screen=screens[action];render();return}
- if(action==='capture-voice'){toggleRecording();return}
- if(action==='understand'){parseFreeOrder();render();return}
- if(action==='save-item'){if(state.editing===null)state.cart.push({...state.draft});else state.cart[state.editing]={...state.draft};state.editing=null;state.screen='order';render();return}
- if(action==='pickup'){state.serviceReply='订单已完成，请凭 #018 取餐';navigator.vibrate?.([120,80,120]);render();return}
- if(action==='next-step'){if(state.partnerStep<3){state.partnerStep++;navigator.vibrate?.(60);render()}else{state.screen='feedback';render()}return}
- if(action==='submit-feedback'){const r=JSON.parse(localStorage.getItem('wemeet-feedback')||'[]');r.push({...state.feedback,createdAt:new Date().toISOString()});localStorage.setItem('wemeet-feedback',JSON.stringify(r));state.screen='thanks';render();return}
- if(action==='reset'){Object.assign(state,{screen:'home',communication:'点击卡片',category:'经典咖啡',editing:null,draft:null,cart:[],service:{pickup:'店内享用',urgency:'不着急',note:''},partnerStep:0,reply:'',serviceIntent:'',serviceReply:'',freeInput:'',inputResult:false,feedback:{clear:0,helpful:0,pressure:0,note:''}});render()}
+document.addEventListener('click',e=>{
+ const action=e.target.closest('[data-action]');if(action){handleAction(action.dataset.action,action);return}
+ const p=e.target.closest('[data-product]');if(p){state.selected={...product(p.dataset.product)};state.screen='confirm';render();return}
+ const cat=e.target.closest('[data-category]');if(cat){state.category=cat.dataset.category;render();return}
+ const order=e.target.closest('[data-order]');if(order){state.activeOrder=order.dataset.order;const o=state.orders.find(x=>x.id===state.activeOrder);o.alert='';render();return}
+ const status=e.target.closest('[data-status]');if(status&&status.dataset.status){const o=state.orders.find(x=>x.id===state.activeOrder);o.status=status.dataset.status;if(o.status==='ready')o.messages.push('系统：已向顾客显示取餐提醒');if(o.status==='done')state.activeOrder=null;state.toast=`订单已更新为${statusLabel[o.status]}`;render();return}
+ const quick=e.target.closest('[data-quick]');if(quick){state.draftMessage=quick.dataset.quick;render();return}
+ const reply=e.target.closest('[data-reply]');if(reply){state.bigText=reply.dataset.reply;state.modal='bigtext';render();return}
+ const big=e.target.closest('[data-big]');if(big){state.bigText=big.dataset.big;render();return}
+ const writer=e.target.closest('[data-writer]');if(writer){state.writer=writer.dataset.writer;render();return}
+ if(e.target.closest('[data-return-big]'))location.reload();
 });
-document.addEventListener('input',e=>{if(e.target.matches('[data-free-input]')){state.freeInput=e.target.value;document.querySelectorAll('[data-live-input]').forEach(node=>{node.textContent=state.freeInput||(node.dataset.liveInput==='customer'?'你的表达会出现在这里，并同步变成咖啡师可见的字幕。':'等待顾客表达……')});const understand=document.querySelector('[data-action="understand"]');if(understand)understand.disabled=!state.freeInput.trim()}if(e.target.matches('[data-item-note]'))state.draft.note=e.target.value;if(e.target.matches('[data-service-note]'))state.service.note=e.target.value;if(e.target.matches('[data-note]'))state.feedback.note=e.target.value});
+
+document.addEventListener('input',e=>{if(e.target.id==='free-text')state.freeText=e.target.value;if(e.target.id==='big-text-input')state.bigText=e.target.value;if(e.target.id==='order-message')state.draftMessage=e.target.value});
+
+const floating=document.createElement('button');floating.className='floating-access';floating.dataset.action='open-toolbox';floating.innerHTML='<span>🤟</span><b>无障碍沟通</b>';document.body.appendChild(floating);
 render();
