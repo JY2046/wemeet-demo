@@ -1,17 +1,36 @@
 const app = document.querySelector('#app');
 
 const menu = [
-  {id:'grape',name:'黑葡萄美式',price:24,emoji:'🍇',category:'咖啡',defaults:['冷','正常冰','标准糖']},
-  {id:'salary',name:'升薪美式',price:20,emoji:'☕',category:'咖啡',defaults:['热','标准糖']},
-  {id:'latte',name:'拿铁',price:22,emoji:'🥛',category:'咖啡',defaults:['热','鲜奶','标准糖']},
-  {id:'coconut-latte',name:'厚椰拿铁',price:24,emoji:'🥥',category:'咖啡',defaults:['冷','正常冰','厚椰乳']},
-  {id:'oat-latte',name:'燕麦拿铁',price:26,emoji:'🌾',category:'咖啡',defaults:['冷','正常冰','燕麦奶']},
-  {id:'matcha-milk',name:'抹茶鲜奶（无咖啡）',price:24,emoji:'🍵',category:'非咖',defaults:['冷','正常冰','鲜奶']},
-  {id:'peach-tea',name:'白桃乌龙茶',price:18,emoji:'🍑',category:'非咖',defaults:['冷','正常冰','标准糖']},
-  {id:'strawberry',name:'草莓苏打',price:22,emoji:'🍓',category:'非咖',defaults:['冷','正常冰']},
-  {id:'butter',name:'招牌黄油可颂',price:16,emoji:'🥐',category:'烘焙',defaults:['加热']},
-  {id:'bbq',name:'叉烧可颂',price:22,emoji:'🥪',category:'烘焙',defaults:['加热']}
+  {id:'blend-americano',name:'美式',price:16,emoji:'☕',category:'意式咖啡',series:'焦糖坚果拼配',desc:'巴西 · 哥伦比亚 · 乌干达｜奶油、焦糖、黑巧、坚果',defaults:['冷 / 热']},
+  {id:'blend-americano-xl',name:'1000ml 超大杯美式',price:23,emoji:'🥤',category:'意式咖啡',series:'焦糖坚果拼配',defaults:['冷']},
+  {id:'blend-latte',name:'拿铁',price:23,emoji:'🥛',category:'意式咖啡',series:'焦糖坚果拼配',defaults:['冷 / 热','鲜奶']},
+  {id:'blend-latte-xl',name:'1000ml 超大杯拿铁',price:34,emoji:'🥤',category:'意式咖啡',series:'焦糖坚果拼配',defaults:['冷','鲜奶']},
+  {id:'blend-oat-latte',name:'燕麦拿铁',price:28,emoji:'🌾',category:'意式咖啡',series:'焦糖坚果拼配',defaults:['冷 / 热','燕麦奶']},
+  {id:'blend-dirty',name:'Dirty',price:26,emoji:'🤎',category:'意式咖啡',series:'焦糖坚果拼配',defaults:['冷','鲜奶']},
+  {id:'blend-coconut-latte',name:'厚椰拿铁',price:26,emoji:'🥥',category:'意式咖啡',series:'焦糖坚果拼配',defaults:['冷','厚椰乳']},
+  {id:'soe-americano',name:'SOE 美式',price:23,emoji:'🌼',category:'意式咖啡',series:'SOE / 花魁',desc:'埃塞俄比亚｜茉莉花、莓果、柑橘',defaults:['冷 / 热']},
+  {id:'soe-americano-xl',name:'1000ml 超大杯 SOE 美式',price:34,emoji:'🥤',category:'意式咖啡',series:'SOE / 花魁',defaults:['冷']},
+  {id:'soe-latte',name:'SOE 拿铁',price:30,emoji:'🌸',category:'意式咖啡',series:'SOE / 花魁',defaults:['冷 / 热','鲜奶']},
+  {id:'soe-latte-xl',name:'1000ml 超大杯 SOE 拿铁',price:42,emoji:'🥤',category:'意式咖啡',series:'SOE / 花魁',defaults:['冷','鲜奶']},
+  {id:'soe-oat-latte',name:'SOE 燕麦拿铁',price:34,emoji:'🌾',category:'意式咖啡',series:'SOE / 花魁',defaults:['冷 / 热','燕麦奶']},
+  {id:'soe-dirty',name:'SOE Dirty',price:32,emoji:'🤎',category:'意式咖啡',series:'SOE / 花魁',defaults:['冷','鲜奶']},
+  {id:'citrus-sparkling-americano',name:'沃柑 / 接骨木 / 话梅气泡冰美式',price:28,emoji:'🍊',category:'特调咖啡',defaults:['冷','请选择风味']},
+  {id:'flavored-dirty',name:'香芋 / 干姜 / 海盐玫瑰 Dirty',price:28,emoji:'💜',category:'特调咖啡',defaults:['冷','请选择风味']},
+  {id:'corn-candy',name:'玉米软糖',price:32,emoji:'🌽',category:'特调咖啡',defaults:['请与咖啡师确认温度']},
+  {id:'sesame-latte',name:'黑芝麻拿铁',price:32,emoji:'⚫',category:'特调咖啡',defaults:['冷 / 热']},
+  {id:'apple-cream-pie',name:'苹果奶油派',price:32,emoji:'🍎',category:'特调咖啡',defaults:['请与咖啡师确认温度']},
+  {id:'turmeric-cinnamon-latte',name:'姜黄肉桂拿铁',price:32,emoji:'🫚',category:'特调咖啡',defaults:['冷 / 热']},
+  {id:'apple-cinnamon-latte',name:'苹果肉桂拿铁',price:32,emoji:'🍏',category:'特调咖啡',defaults:['冷 / 热']},
+  {id:'coconut-candy',name:'椰子糖',price:32,emoji:'🥥',category:'特调咖啡',defaults:['请与咖啡师确认温度']},
+  {id:'grape-coldbrew',name:'葡萄冰萃',price:32,emoji:'🍇',category:'特调咖啡',defaults:['冷']},
+  {id:'basil-lime',name:'罗勒和青柠',price:32,emoji:'🌿',category:'特调咖啡',defaults:['冷']},
+  {id:'sea-salt-cheese-latte',name:'海盐芝士拿铁',price:28,emoji:'🧀',category:'特调咖啡',defaults:['冷']},
+  {id:'osmanthus-fermented-latte',name:'桂花酒酿拿铁',price:28,emoji:'🌼',category:'特调咖啡',defaults:['冷 / 热']},
+  {id:'salty-mocha',name:'咸摩卡',price:28,emoji:'🍫',category:'特调咖啡',defaults:['冷 / 热']},
+  {id:'green-coconut-americano',name:'青椰美式',price:26,emoji:'🌴',category:'特调咖啡',defaults:['冷']}
 ];
+
+const menuExtras = ['另加双份浓缩 +5 元','SOE 双份浓缩 +8 元','换燕麦奶 +5 元'];
 
 const signCards = [
   {word:'你好',hint:'见面时，用手语和咖啡师打个招呼。',emoji:'👋'},
@@ -29,9 +48,9 @@ const state = {
   screen:'home', modal:null, category:'全部', selected:null, freeText:'', transcript:'', parseError:'',
   recording:false, transcribing:false, recorder:null, stream:null, chunks:[],
   orders:[
-    {id:'A18',source:'美团扫码',time:'14:26',status:'new',items:[{name:'黑葡萄美式',qty:1,spec:'冷 · 少冰 · 少糖'}],note:'打包带走，请不要吸管',alert:'新订单',changed:null,messages:[]},
-    {id:'A17',source:'店内沟通',time:'14:21',status:'making',items:[{name:'厚椰拿铁',qty:1,spec:'冷 · 正常冰'}],note:'',alert:'',changed:'正常糖 → 不另外加糖',messages:['顾客 14:23：麻烦改成不另外加糖']},
-    {id:'A16',source:'美团扫码',time:'14:15',status:'ready',items:[{name:'招牌黄油可颂',qty:1,spec:'加热'}],note:'',alert:'',changed:null,messages:[]}
+    {id:'A18',source:'美团扫码',time:'14:26',status:'new',items:[{name:'SOE 拿铁',qty:1,spec:'冷 · 换燕麦奶'}],note:'打包带走，请不要吸管',alert:'新订单',changed:null,messages:[]},
+    {id:'A17',source:'店内沟通',time:'14:21',status:'making',items:[{name:'桂花酒酿拿铁',qty:1,spec:'热'}],note:'',alert:'',changed:'鲜奶 → 燕麦奶',messages:['顾客 14:23：麻烦换成燕麦奶']},
+    {id:'A16',source:'美团扫码',time:'14:15',status:'ready',items:[{name:'青椰美式',qty:1,spec:'冷'}],note:'',alert:'',changed:null,messages:[]}
   ],
   activeOrder:null, draftMessage:'', bigText:'', writer:'customer', signIndex:0, signStage:'choose', toast:''
 };
@@ -90,11 +109,11 @@ function renderCommunicate(){return `
   <button class="sign-invite" data-action="open-sign"><span>🤟</span><span><b>和咖啡师学一句手语</b><small>这是轻松的互动，不影响点单</small></span><b>→</b></button>`}
 
 function renderMenu(){
- const cats=['全部','咖啡','非咖','烘焙'];
+ const cats=['全部','意式咖啡','特调咖啡','手冲咖啡'];
  const items=menu.filter(x=>state.category==='全部'||x.category===state.category);
  return `<section class="page-head compact-head"><button class="back" data-action="communicate">←</button><div><div class="eyebrow">ETHER MENU</div><h2>点选菜单</h2></div></section>
  <div class="category-tabs">${cats.map(c=>`<button class="${state.category===c?'active':''}" data-category="${c}">${c}</button>`).join('')}</div>
- <div class="menu-grid">${items.map(x=>`<button class="menu-card" data-product="${x.id}"><span>${x.emoji}</span><div><b>${x.name}</b><small>${x.defaults.join(' · ')}</small></div><strong>${money(x.price)}</strong></button>`).join('')}</div>`
+ ${state.category==='手冲咖啡'?`<div class="pour-over-card"><span>🫘</span><div><h3>手冲咖啡</h3><p>豆单随产季更新，请直接咨询咖啡师，为您进行详细介绍。</p></div></div>`:`<div class="menu-grid">${items.map(x=>`<button class="menu-card" data-product="${x.id}"><span>${x.emoji}</span><div><b>${x.name}</b><small>${x.series?x.series+' · ':''}${x.defaults.join(' · ')}</small></div><strong>${money(x.price)}</strong></button>`).join('')}</div>`}<div class="menu-extras">${menuExtras.map(x=>`<span>${x}</span>`).join('')}</div>`
 }
 
 function renderConfirm(){
@@ -157,7 +176,7 @@ function renderModal(){
 const modalShell=(title,body,wide=false)=>`<div class="modal-backdrop" data-action="close-modal"></div><section class="modal ${wide?'wide':''}" role="dialog" aria-modal="true"><header><div><div class="eyebrow">无障碍沟通</div><h2>${title}</h2></div><button data-action="close-modal" aria-label="关闭">×</button></header>${body}</section>`;
 
 function renderInputModal(){return modalShell(state.inputKind==='voice'?'语音转字幕':'直接输入文字',`
- <div class="live-caption"><small>双方都能看到的文字</small><textarea id="free-text" placeholder="例如：一杯黑葡萄美式，少冰少糖，打包带走">${esc(state.freeText)}</textarea></div>
+ <div class="live-caption"><small>双方都能看到的文字</small><textarea id="free-text" placeholder="例如：一杯 SOE 燕麦拿铁，冷的，打包带走">${esc(state.freeText)}</textarea></div>
  ${state.parseError?`<div class="error-box">${esc(state.parseError)}</div>`:''}
  ${state.inputKind==='voice'?`<button class="record-button ${state.recording?'recording':''}" data-action="record">${state.transcribing?'正在转写…':state.recording?'■ 结束录音':'● 开始录音'}</button><p class="modal-tip">录音只在你主动操作后上传用于转写，不在浏览器中长期保存。</p>`:''}
  <div class="modal-actions"><button class="secondary" data-action="open-writing">改用手写</button><button class="primary-button" data-action="parse-order">整理为候选订单</button></div>`)}
@@ -174,11 +193,22 @@ function renderSign(){
 
 function renderReplies(){return modalShell('咖啡师快捷回复',`<p class="modal-lead">点击一句话，可选择全屏展示给顾客。</p><div class="reply-list">${quickReplies.map(x=>`<button data-reply="${x}"><span>${x}</span><b>显示 →</b></button>`).join('')}</div>`)}
 function renderHelp(){return modalShell('沟通遇到困难',`<p class="modal-lead">不是谁做错了。换一种方式继续就好。</p><div class="help-grid"><button data-action="text-mode">⌨️ 换成文字</button><button data-action="open-writing">✍️ 使用手写板</button><button data-action="open-bigtext">🔤 全屏大字</button><button data-action="voice-mode">🎙️ 再说一次</button><button data-action="ask-slow">🐢 请放慢表达</button><button data-action="ask-colleague">🫶 请同事协助</button></div>`)}
-function renderManual(){return modalShell('手动录入现有订单',`<label class="field">商品名称<input id="manual-product" placeholder="例如：厚椰拿铁"/></label><label class="field">规格<input id="manual-spec" placeholder="例如：冷、少冰、不另外加糖"/></label><label class="field">备注<textarea id="manual-note" placeholder="例如：打包带走"></textarea></label><button class="primary-button full" data-action="save-manual">发送到咖啡师工作台</button>`)}
+function renderManual(){return modalShell('手动录入现有订单',`<label class="field">商品名称<input id="manual-product" placeholder="例如：桂花酒酿拿铁"/></label><label class="field">规格<input id="manual-spec" placeholder="例如：冷、少冰、不另外加糖"/></label><label class="field">备注<textarea id="manual-note" placeholder="例如：打包带走"></textarea></label><button class="primary-button full" data-action="save-manual">发送到咖啡师工作台</button>`)}
 
 function detectProduct(text){
  const t=text.toLowerCase().replace(/[\s，。,.！？!?]/g,'');
- const aliases=[['coconut-latte',['厚椰拿铁','椰乳拿铁']],['oat-latte',['燕麦拿铁','燕麦奶拿铁']],['matcha-milk',['抹茶鲜奶','抹茶牛奶','无咖啡因抹茶']],['grape',['黑葡萄美式','葡萄美式']],['salary',['升薪美式','经典美式']],['peach-tea',['白桃乌龙茶','白桃乌龙']],['strawberry',['草莓苏打','草莓气泡水']],['butter',['招牌黄油可颂','黄油可颂']],['bbq',['叉烧可颂']],['latte',['拿铁']]];
+ const aliases=[
+  ['soe-americano-xl',['1000ml超大杯soe美式','超大杯soe美式']],['soe-latte-xl',['1000ml超大杯soe拿铁','超大杯soe拿铁']],
+  ['blend-americano-xl',['1000ml超大杯美式','超大杯美式']],['blend-latte-xl',['1000ml超大杯拿铁','超大杯拿铁']],
+  ['soe-oat-latte',['soe燕麦拿铁','花魁燕麦拿铁']],['soe-latte',['soe拿铁','花魁拿铁']],['soe-americano',['soe美式','花魁美式']],['soe-dirty',['soedirty','花魁dirty']],
+  ['blend-coconut-latte',['厚椰拿铁']],['blend-oat-latte',['燕麦拿铁']],['blend-dirty',['dirty','迪提','迪缇']],
+  ['citrus-sparkling-americano',['沃柑气泡冰美式','接骨木气泡冰美式','话梅气泡冰美式','气泡冰美式']],
+  ['flavored-dirty',['香芋dirty','干姜dirty','海盐玫瑰dirty']],['corn-candy',['玉米软糖']],['sesame-latte',['黑芝麻拿铁']],
+  ['apple-cream-pie',['苹果奶油派']],['turmeric-cinnamon-latte',['姜黄肉桂拿铁']],['apple-cinnamon-latte',['苹果肉桂拿铁']],
+  ['coconut-candy',['椰子糖']],['grape-coldbrew',['葡萄冰萃']],['basil-lime',['罗勒和青柠','罗勒青柠']],
+  ['sea-salt-cheese-latte',['海盐芝士拿铁']],['osmanthus-fermented-latte',['桂花酒酿拿铁']],['salty-mocha',['咸摩卡']],['green-coconut-americano',['青椰美式']],
+  ['blend-americano',['美式']],['blend-latte',['拿铁']]
+ ];
  for(const [id,words] of aliases)if(words.some(w=>t.includes(w)))return product(id);
  return null;
 }
@@ -204,7 +234,7 @@ async function toggleRecord(){
 }
 
 function addDemoOrder(){
- const n=state.orders.find(o=>o.id==='A19');if(!n)state.orders.unshift({id:'A19',source:'美团订单 · 模拟',time:new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}),status:'new',items:[{name:'燕麦拿铁',qty:1,spec:'冷 · 少冰 · 燕麦奶'}],note:'不要吸管，到店自取',alert:'新订单',changed:null,messages:[]});
+ const n=state.orders.find(o=>o.id==='A19');if(!n)state.orders.unshift({id:'A19',source:'美团订单 · 模拟',time:new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}),status:'new',items:[{name:'SOE 燕麦拿铁',qty:1,spec:'冷 · 燕麦奶'}],note:'不要吸管，到店自取',alert:'新订单',changed:null,messages:[]});
  state.screen='dashboard';state.modal=null;state.toast='新订单已导入，工作台已发出视觉提醒';if(n)state.activeOrder='A19';navigator.vibrate?.([120,80,120]);render();
 }
 
