@@ -61,8 +61,17 @@ class handler(BaseHTTPRequestHandler):
         if workspace: headers["X-DashScope-WorkSpace"]=workspace
         req=urllib.request.Request(endpoint,data=json.dumps(body,ensure_ascii=False).encode(),method="POST",headers=headers)
         with urllib.request.urlopen(req,timeout=75) as response: result=json.loads(response.read().decode())
-        output=result.get("output",{}); text=output.get("text","")
-        if not text and isinstance(output.get("output"),dict): text=output["output"].get("sentence",{}).get("text","")
+        output=result.get("output",{}); text=output.get("text","") if isinstance(output,dict) else ""
+        if not text and isinstance(output,dict) and isinstance(output.get("output"),dict): text=output["output"].get("sentence",{}).get("text","")
+        if not text:
+            try:
+                content=result["choices"][0]["message"]["content"]
+                if isinstance(content,str): text=content
+                elif isinstance(content,list): text="".join(str(x.get("text",x.get("transcript",""))) for x in content if isinstance(x,dict))
+            except (KeyError,IndexError,TypeError): pass
+        if not text and isinstance(output,dict) and isinstance(output.get("choices"),list):
+            try: text=output["choices"][0]["message"]["content"]
+            except (KeyError,IndexError,TypeError): pass
         return str(text).strip(),"dashscope-qwen-asr",model
 
     def _openai(self,audio:bytes,mime:str,filename:str,key:str):
