@@ -47,6 +47,7 @@ SYSTEM = """你是 Ether Coffee 的受约束订单理解器。只把顾客原话
 6. 明确说删除/不要某杯时不要保留该杯。无法对应菜单时澄清。
 7. 输出只是双方确认前的候选订单。
 8. 不得遗漏原话中的换奶、双份浓缩、温度、数量和取餐方式。
+9. “普通拿铁换燕麦奶”必须输出 blend-latte + 换燕麦奶，不能输出 blend-oat-latte；菜单成品燕麦拿铁仅在顾客直接点“燕麦拿铁”时使用。燕麦拿铁商品绝不能再叠加“换燕麦奶”。
 示例：“两杯拿铁，一杯普通拿铁换燕麦奶，另一杯SOE拿铁加双份浓缩，都要冷的”必须输出两项：blend-latte + 换燕麦奶，以及 soe-latte + SOE 双份浓缩，两项温度均为冷。"""
 MENU_TEXT = "\n".join(f"{pid}: {name} ¥{price}" for pid,(name,price) in MENU.items())
 
@@ -75,7 +76,7 @@ class handler(BaseHTTPRequestHandler):
             if aiping_key:
                 provider="aiping"; provider_key=aiping_key
                 provider_url=(os.environ.get("AIPING_BASE_URL") or "https://aiping.cn/api/v1").rstrip("/")+"/chat/completions"
-                provider_model=os.environ.get("AIPING_ORDER_MODEL","DeepSeek-V3.2")
+                provider_model=os.environ.get("AIPING_ORDER_MODEL","Qwen3-32B")
             elif dashscope_key:
                 provider="dashscope-qwen"; provider_key=dashscope_key
                 provider_url=(os.environ.get("DASHSCOPE_BASE_URL") or "https://dashscope.aliyuncs.com/compatible-mode/v1").rstrip("/")+"/chat/completions"
@@ -117,6 +118,9 @@ class handler(BaseHTTPRequestHandler):
             if pid in FLAVORS and flavor not in FLAVORS[pid]: invalid=True
             if pid not in FLAVORS: flavor=None
             extras=[x for x in item.get("extras",[]) if x in EXTRAS]
+            # A menu oat latte already includes oat milk; adding the replacement again would double-charge.
+            if pid in ("blend-oat-latte","soe-oat-latte") and "换燕麦奶" in extras:
+                invalid=True; extras=[x for x in extras if x!="换燕麦奶"]
             # Prevent wrong-priced espresso modifier family.
             extras=[x for x in extras if not (x=="双份浓缩" and pid.startswith("soe-")) and not (x=="SOE 双份浓缩" and not pid.startswith("soe-"))]
             name,base=MENU[pid]; extra_total=sum(EXTRAS[x] for x in extras); qty=max(1,min(20,int(item.get("quantity",1))))
