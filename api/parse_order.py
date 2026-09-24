@@ -56,10 +56,11 @@ class handler(BaseHTTPRequestHandler):
         self.send_header("Content-Type","application/json; charset=utf-8"); self.send_header("Content-Length",str(len(body)))
         self.send_header("Cache-Control","no-store"); self.send_header("X-Content-Type-Options","nosniff"); self.end_headers(); self.wfile.write(body)
     def do_GET(self)->None:
-        self._json(200,{"ok":True,"service":"wemeet-order-parser","configured":bool(os.environ.get("OPENAI_API_KEY")),"menuItems":len(MENU)})
+        self._json(200,{"ok":True,"service":"wemeet-order-parser","configured":bool(os.environ.get("DASHSCOPE_API_KEY") or os.environ.get("OPENAI_API_KEY")),"preferredProvider":"dashscope-qwen" if os.environ.get("DASHSCOPE_API_KEY") else "openai-fallback","menuItems":len(MENU)})
     def do_POST(self)->None:
         key=os.environ.get("OPENAI_API_KEY","")
-        if not key: self._json(503,{"ok":False,"error":"service_not_configured"}); return
+        dashscope_key=os.environ.get("DASHSCOPE_API_KEY","")
+        if not key and not dashscope_key: self._json(503,{"ok":False,"error":"service_not_configured"}); return
         try:
             length=int(self.headers.get("Content-Length","0") or 0)
             if length<=0 or length>MAX_BODY: self._json(413,{"ok":False,"error":"request_too_large"}); return
@@ -68,15 +69,20 @@ class handler(BaseHTTPRequestHandler):
             if not text or len(text)>2000: self._json(400,{"ok":False,"error":"invalid_text"}); return
             output_contract = '''只输出 JSON 对象，不要 Markdown。必须包含：
 {"items":[{"product_id":"菜单ID","quantity":1,"temperature":"冷或热或null","flavor":"风味或null","extras":["合法加料"],"note":""}],"fulfillment":"堂食或打包带走或null","overall_note":"","needs_clarification":false,"clarification_question":null}'''
-            request_body={"model":"gpt-4o-mini","temperature":0,"messages":[
+            dashscope_key=os.environ.get("DASHSCOPE_API_KEY","")
+            provider="dashscope-qwen" if dashscope_key else "openai"
+            provider_key=dashscope_key or key
+            provider_url=(os.environ.get("DASHSCOPE_BASE_URL") or "https://dashscope.aliyuncs.com/compatible-mode/v1").rstrip("/")+"/chat/completions" if dashscope_key else "https://api.openai.com/v1/chat/completions"
+            provider_model=os.environ.get("DASHSCOPE_ORDER_MODEL","qwen-plus") if dashscope_key else os.environ.get("OPENAI_ORDER_MODEL","gpt-4o-mini")
+            request_body={"model":provider_model,"temperature":0,"messages":[
                 {"role":"system","content":SYSTEM+"\n\n"+output_contract+"\n\n当前菜单：\n"+MENU_TEXT},
                 {"role":"user","content":"顾客原话："+text}
             ],"response_format":{"type":"json_object"}}
-            req=urllib.request.Request("https://api.openai.com/v1/chat/completions",data=json.dumps(request_body,ensure_ascii=False).encode(),method="POST",headers={"Authorization":f"Bearer {key}","Content-Type":"application/json"})
+            req=urllib.request.Request(provider_url,data=json.dumps(request_body,ensure_ascii=False).encode(),method="POST",headers={"Authorization":f"Bearer {provider_key}","Content-Type":"application/json"})
             with urllib.request.urlopen(req,timeout=45) as response: raw=json.loads(response.read().decode())
             parsed=json.loads(raw["choices"][0]["message"]["content"])
             result=self._validate(parsed, text)
-            self._json(200,{"ok":True,"engine":"openai-structured-order","candidate":result})
+            self._json(200,{"ok":True,"engine":provider+"-structured-order","model":provider_model,"candidate":result})
         except urllib.error.HTTPError as exc:
             provider_code = "unknown"
             provider_param = None
