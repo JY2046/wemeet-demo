@@ -72,6 +72,8 @@ class handler(BaseHTTPRequestHandler):
         if not text and isinstance(output,dict) and isinstance(output.get("choices"),list):
             try: text=output["choices"][0]["message"]["content"]
             except (KeyError,IndexError,TypeError): pass
+        if isinstance(text,list): text="".join(str(x.get("text",x.get("transcript",""))) for x in text if isinstance(x,dict))
+        elif isinstance(text,dict): text=text.get("text",text.get("transcript",""))
         return str(text).strip(),"dashscope-qwen-asr",model
 
     def _openai(self,audio:bytes,mime:str,filename:str,key:str):
