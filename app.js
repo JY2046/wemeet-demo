@@ -1,4 +1,6 @@
 const app = document.querySelector('#app');
+const FC_API_ORIGIN = 'https://wemeet-demo-qixxweiimr.cn-shenzhen.fcapp.run';
+const apiUrl = path => location.hostname === 'jy2046.github.io' ? `${FC_API_ORIGIN}${path}` : path;
 
 const menu = [
   {id:'blend-americano',name:'美式',price:16,emoji:'☕',category:'意式咖啡',series:'焦糖坚果拼配',desc:'巴西 · 哥伦比亚 · 乌干达｜奶油、焦糖、黑巧、坚果',defaults:['冷 / 热']},
@@ -231,7 +233,7 @@ async function parseOrder(){
  if(!state.freeText){state.parseError='请先说出或输入点单需求。';render();return}
  state.parsing=true;render();
  try{
-  const response=await fetch('/api/parse_order',{method:'POST',headers:{'Content-Type':'application/json','X-WeMeet-Consent':'user-initiated'},body:JSON.stringify({text:state.freeText})});
+  const response=await fetch(apiUrl('/api/parse_order'),{method:'POST',headers:{'Content-Type':'application/json','X-WeMeet-Consent':'user-initiated'},body:JSON.stringify({text:state.freeText})});
   const data=await response.json().catch(()=>({}));if(!response.ok||!data.ok)throw new Error(data.error||'parse_failed');
   const c=data.candidate;
   if(c.needsClarification){state.parsing=false;state.parseError=c.clarificationQuestion||'有些内容还不明确，请补充后再整理。';render();return}
@@ -249,7 +251,7 @@ async function toggleRecord(){
  try{
   const stream=await navigator.mediaDevices.getUserMedia({audio:true});state.stream=stream;state.chunks=[];
   const recorder=new MediaRecorder(stream);state.recorder=recorder;recorder.ondataavailable=e=>{if(e.data.size)state.chunks.push(e.data)};
-  recorder.onstop=async()=>{try{const blob=new Blob(state.chunks,{type:recorder.mimeType||'audio/webm'});const form=new FormData();form.append('audio',blob,'wemeet-recording.webm');const r=await fetch('/api/transcribe',{method:'POST',body:form,headers:{'X-WeMeet-Consent':'user-initiated'}});const data=await r.json();if(!r.ok||!data.ok)throw new Error();state.freeText=data.text||'';state.transcribing=false;state.modal='input';render()}catch(e){state.transcribing=false;state.toast='转写失败，请改用文字或手写';render()}};
+  recorder.onstop=async()=>{try{const blob=new Blob(state.chunks,{type:recorder.mimeType||'audio/webm'});const form=new FormData();form.append('audio',blob,'wemeet-recording.webm');const r=await fetch(apiUrl('/api/transcribe'),{method:'POST',body:form,headers:{'X-WeMeet-Consent':'user-initiated'}});const data=await r.json();if(!r.ok||!data.ok)throw new Error();state.freeText=data.text||'';state.transcribing=false;state.modal='input';render()}catch(e){state.transcribing=false;state.toast='转写失败，请改用文字或手写';render()}};
   recorder.start();state.recording=true;render();
  }catch(e){state.toast='无法使用麦克风，请检查权限或改用文字';render()}
 }
