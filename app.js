@@ -1,6 +1,6 @@
 const app = document.querySelector('#app');
-const FC_API_ORIGIN = 'https://wemeet-demo-qixxweiimr.cn-shenzhen.fcapp.run';
-const apiUrl = path => ['jy2046.github.io','wemeet.cogineai.com'].includes(location.hostname) ? `${FC_API_ORIGIN}${path}` : path;
+const FC_API_ORIGIN = 'https://wemeet-demo-qixxweiimr.cn-hongkong.fcapp.run';
+const apiUrl = path => location.hostname === 'jy2046.github.io' ? `${FC_API_ORIGIN}${path}` : path;
 
 const menu = [
   {id:'blend-americano',name:'美式',price:16,emoji:'☕',category:'意式咖啡',series:'焦糖坚果拼配',desc:'巴西 · 哥伦比亚 · 乌干达｜奶油、焦糖、黑巧、坚果',defaults:['冷 / 热']},
@@ -18,14 +18,14 @@ const menu = [
   {id:'soe-dirty',name:'SOE Dirty',price:32,emoji:'🤎',category:'意式咖啡',series:'SOE / 花魁',defaults:['冷','鲜奶']},
   {id:'citrus-sparkling-americano',name:'沃柑 / 接骨木 / 话梅气泡冰美式',price:28,emoji:'🍊',category:'特调咖啡',defaults:['冷','请选择风味']},
   {id:'flavored-dirty',name:'香芋 / 干姜 / 海盐玫瑰 Dirty',price:28,emoji:'💜',category:'特调咖啡',defaults:['冷','请选择风味']},
-  {id:'corn-candy',name:'玉米软糖',price:32,emoji:'🌽',category:'特调咖啡',defaults:['请与咖啡师确认温度']},
-  {id:'sesame-latte',name:'黑芝麻拿铁',price:32,emoji:'⚫',category:'特调咖啡',defaults:['冷 / 热']},
-  {id:'apple-cream-pie',name:'苹果奶油派',price:32,emoji:'🍎',category:'特调咖啡',defaults:['请与咖啡师确认温度']},
-  {id:'turmeric-cinnamon-latte',name:'姜黄肉桂拿铁',price:32,emoji:'🫚',category:'特调咖啡',defaults:['冷 / 热']},
-  {id:'apple-cinnamon-latte',name:'苹果肉桂拿铁',price:32,emoji:'🍏',category:'特调咖啡',defaults:['冷 / 热']},
-  {id:'coconut-candy',name:'椰子糖',price:32,emoji:'🥥',category:'特调咖啡',defaults:['请与咖啡师确认温度']},
-  {id:'grape-coldbrew',name:'葡萄冰萃',price:32,emoji:'🍇',category:'特调咖啡',defaults:['冷']},
-  {id:'basil-lime',name:'罗勒和青柠',price:32,emoji:'🌿',category:'特调咖啡',defaults:['冷']},
+  {id:'corn-candy',name:'玉米软糖',price:32,emoji:'🌽',category:'饮品',defaults:['请与咖啡师确认温度']},
+  {id:'sesame-latte',name:'黑芝麻拿铁',price:32,emoji:'⚫',category:'饮品',defaults:['冷 / 热']},
+  {id:'apple-cream-pie',name:'苹果奶油派',price:32,emoji:'🍎',category:'饮品',defaults:['请与咖啡师确认温度']},
+  {id:'turmeric-cinnamon-latte',name:'姜黄肉桂拿铁',price:32,emoji:'🫚',category:'饮品',defaults:['冷 / 热']},
+  {id:'apple-cinnamon-latte',name:'苹果肉桂拿铁',price:32,emoji:'🍏',category:'饮品',defaults:['冷 / 热']},
+  {id:'coconut-candy',name:'椰子糖',price:32,emoji:'🥥',category:'饮品',defaults:['请与咖啡师确认温度']},
+  {id:'grape-coldbrew',name:'葡萄冰萃',price:32,emoji:'🍇',category:'饮品',defaults:['冷']},
+  {id:'basil-lime',name:'罗勒和青柠',price:32,emoji:'🌿',category:'饮品',defaults:['冷']},
   {id:'sea-salt-cheese-latte',name:'海盐芝士拿铁',price:28,emoji:'🧀',category:'特调咖啡',defaults:['冷']},
   {id:'osmanthus-fermented-latte',name:'桂花酒酿拿铁',price:28,emoji:'🌼',category:'特调咖啡',defaults:['冷 / 热']},
   {id:'salty-mocha',name:'咸摩卡',price:28,emoji:'🍫',category:'特调咖啡',defaults:['冷 / 热']},
@@ -43,11 +43,11 @@ const signCards = [
 ];
 
 const quickReplies = [
-  '请稍等，我正在查看','请用文字写下来','这款今天售罄了','可以为您更换其他饮品','预计还需 10 分钟','您的饮品做好了','请到取餐区取餐','我需要请同事协助'
+  '请稍等，我正在查看','请用文字写下来','这款今天售罄了','可以为您更换其他饮品','预计还需 10 分钟','您的饮品做好了','稍后为您送餐到桌','我需要请同事协助'
 ];
 
 const state = {
-  screen:'home', modal:null, category:'全部', selected:null, candidate:null, freeText:'', transcript:'', parseError:'', parsing:false,
+  screen:'home', modal:null, category:'意式咖啡', orderEntry:'barista', selected:null, productConfig:null, candidate:null, freeText:'', transcript:'', parseError:'', parsing:false,
   recording:false, transcribing:false, recorder:null, stream:null, chunks:[],
   orders:[
     {id:'A18',source:'美团扫码',time:'14:26',status:'new',items:[{name:'SOE 拿铁',qty:1,spec:'冷 · 换燕麦奶'}],note:'打包带走，请不要吸管',alert:'新订单',changed:null,messages:[]},
@@ -79,16 +79,16 @@ function renderHome(){return `
     </div>
     <div class="home-actions">
       <button class="journey-card primary" data-action="existing">
-        <span class="journey-icon">📱</span><span><small>顾客已完成点单</small><strong>我已经扫码下单</strong><em>查看订单 · 追加需求 · 取餐提醒</em></span><b>→</b>
+        <span class="journey-icon">📱</span><span><small>已经在美团完成点单</small><strong>我已经扫码下单</strong><em>查看订单 · 追加需求 · 送餐提醒</em></span><b>→</b>
+      </button>
+      <button class="journey-card" data-action="scan-order">
+        <span class="journey-icon">▦</span><span><small>顾客自主下单</small><strong>扫描点单码下单</strong><em>打开点单码 · 选择饮品 · 提交订单</em></span><b>→</b>
       </button>
       <button class="journey-card" data-action="communicate">
-        <span class="journey-icon">💬</span><span><small>需要面对面交流</small><strong>我需要沟通点单</strong><em>点选 · 语音字幕 · 打字 · 手写</em></span><b>→</b>
+        <span class="journey-icon">💬</span><span><small>需要面对面交流</small><strong>我需要沟通点单</strong><em>咖啡师代客选择饮品并确认</em></span><b>→</b>
       </button>
-      <button class="staff-entry" data-action="dashboard"><span>👀</span><span><b>进入咖啡师工作台</b><small>订单、改单、沟通与取餐</small></span><b>3</b></button>
+      <button class="staff-entry" data-action="dashboard"><span>👀</span><span><b>进入咖啡师工作台</b><small>订单、改单、沟通与送餐</small></span><b>3</b></button>
     </div>
-  </section>
-  <section class="value-strip">
-    <div><b>01</b><span>现有系统继续用</span></div><div><b>02</b><span>关键信息视觉化</span></div><div><b>03</b><span>沟通失败有退路</span></div>
   </section>`}
 
 function renderExisting(){return `
@@ -101,21 +101,39 @@ function renderExisting(){return `
   <div class="privacy-note">🔒 会意只需要商品、规格、备注和状态，不需要顾客姓名、手机号或地址。</div>`}
 
 function renderCommunicate(){return `
-  <section class="page-head"><button class="back" data-action="home">←</button><div><div class="eyebrow">沟通点单</div><h2>你想怎样表达？</h2><p>随时可以切换，不需要解释原因。</p></div></section>
-  <div class="mode-grid">
-    <button class="mode-card" data-action="open-menu"><span>👆</span><b>点选菜单</b><small>直接选择商品与规格</small></button>
-    <button class="mode-card" data-action="voice-mode"><span>🎙️</span><b>语音转字幕</b><small>说话后双方一起确认文字</small></button>
-    <button class="mode-card" data-action="text-mode"><span>⌨️</span><b>直接打字</b><small>输入需求并整理为候选订单</small></button>
+  <section class="page-head"><button class="back" data-action="home">←</button><div><div class="eyebrow">咖啡师沟通点单</div><h2>为顾客创建店内订单</h2><p>先听懂或看懂顾客的需求，再由咖啡师从完整菜单中选择饮品；提交前双方一起确认。</p></div></section>
+  <div class="barista-order-start">
+    <div><span>☕</span><div><small>店内全部饮品</small><h3>打开咖啡师点单界面</h3><p>按分类浏览饮品、确认规格，并把订单直接发送到咖啡师工作台。</p></div></div>
+    <button class="primary-button" data-action="open-menu">开始点单 →</button>
+  </div>
+  <div class="assist-heading"><div><b>顾客还可以这样表达</b><small>识别后的内容会整理成候选订单，再由双方确认</small></div></div>
+  <div class="mode-grid assist-grid">
+    <button class="mode-card" data-action="voice-mode"><span>🎙️</span><b>语音转字幕</b><small>顾客说，咖啡师看文字</small></button>
+    <button class="mode-card" data-action="text-mode"><span>⌨️</span><b>直接打字</b><small>输入顾客的点单需求</small></button>
     <button class="mode-card" data-action="open-writing"><span>✍️</span><b>双向手写</b><small>面对面写给对方看</small></button>
   </div>
   <button class="sign-invite" data-action="open-sign"><span>🤟</span><span><b>和咖啡师学一句手语</b><small>这是轻松的互动，不影响点单</small></span><b>→</b></button>`}
 
 function renderMenu(){
- const cats=['全部','意式咖啡','特调咖啡','手冲咖啡'];
- const items=menu.filter(x=>state.category==='全部'||x.category===state.category);
- return `<section class="page-head compact-head"><button class="back" data-action="communicate">←</button><div><div class="eyebrow">ETHER MENU</div><h2>点选菜单</h2></div></section>
+ const cats=['意式咖啡','特调咖啡','饮品','手冲咖啡'];
+ const items=menu.filter(x=>x.category===state.category);
+ const scan=state.orderEntry==='scan';
+ return `<section class="page-head compact-head"><button class="back" data-action="${scan?'home':'communicate'}">←</button><div><div class="eyebrow">${scan?'点单码自助点单':'咖啡师点单'} · ETHER MENU</div><h2>${scan?'请选择饮品':'店内全部饮品'}</h2><p>${scan?'顾客可浏览店内菜单并自主下单，提交前会再次确认。':'选择顾客需要的饮品，提交前请与顾客确认。'}</p></div></section>
  <div class="category-tabs">${cats.map(c=>`<button class="${state.category===c?'active':''}" data-category="${c}">${c}</button>`).join('')}</div>
- ${state.category==='手冲咖啡'?`<div class="pour-over-card"><span>🫘</span><div><h3>手冲咖啡</h3><p>豆单随产季更新，请直接咨询咖啡师，为您进行详细介绍。</p></div></div>`:`<div class="menu-grid">${items.map(x=>`<button class="menu-card" data-product="${x.id}"><span>${x.emoji}</span><div><b>${x.name}</b><small>${x.series?x.series+' · ':''}${x.defaults.join(' · ')}</small></div><strong>${money(x.price)}</strong></button>`).join('')}</div>`}<div class="menu-extras">${menuExtras.map(x=>`<span>${x}</span>`).join('')}</div>`
+ ${state.category==='手冲咖啡'?`<div class="pour-over-card"><span>🫘</span><div><h3>手冲咖啡</h3><p>豆单随产季更新，请直接咨询咖啡师，为您进行详细介绍。</p></div></div>`:`<div class="menu-grid">${items.map(x=>`<button class="menu-card" data-product="${x.id}"><span>${x.emoji}</span><div><b>${x.name}</b><small>${x.series||x.category}</small></div><strong>${money(x.price)}</strong></button>`).join('')}</div>`}<div class="menu-extras">${menuExtras.map(x=>`<span>${x}</span>`).join('')}</div>`
+}
+
+function optionButtons(group,options,value){return `<div class="option-row">${options.map(x=>`<button class="${value===x?'active':''}" data-option-group="${group}" data-option-value="${x}">${x}</button>`).join('')}</div>`}
+function renderProductModal(){
+ const p=state.selected,c=state.productConfig;if(!p||!c)return '';
+ return modalShell('选择饮品规格',`<div class="config-product"><span>${p.emoji}</span><div><small>${p.series||p.category}</small><h3>${p.name}</h3><b>${money(p.price)}</b></div></div>
+ <div class="config-section"><label>温度</label>${optionButtons('temperature',c.temperatureOptions,c.temperature)}</div>
+ ${c.temperature==='冷'?`<div class="config-section"><label>冰度</label>${optionButtons('ice',['正常冰','少冰','去冰'],c.ice)}</div>`:''}
+ <div class="config-section"><label>甜度</label>${optionButtons('sweetness',['正常甜','少甜','不另外加糖'],c.sweetness)}</div>
+ ${p.category!=='饮品'?`<div class="config-section"><label>咖啡豆</label>${optionButtons('bean',['焦糖坚果拼配','SOE 花魁'],c.bean)}</div>`:''}
+ ${/拿铁|Dirty|摩卡/.test(p.name)?`<div class="config-section"><label>奶基底</label>${optionButtons('milk',['鲜奶','燕麦奶 +5元'],c.milk)}</div>`:''}
+ <label class="field config-note">其他需求<textarea id="product-note" placeholder="例如：浓一点、不要吸管">${esc(c.note)}</textarea></label>
+ <div class="modal-actions"><button class="secondary" data-action="close-modal">返回菜单</button><button class="primary-button" data-action="confirm-product">加入订单</button></div>`,true)
 }
 
 function renderConfirm(){
@@ -175,6 +193,7 @@ function renderModal(){
  if(state.modal==='replies') html=renderReplies();
  if(state.modal==='help') html=renderHelp();
  if(state.modal==='manual') html=renderManual();
+ if(state.modal==='product-config') html=renderProductModal();
  const old=document.querySelector('#modal-root');if(old)old.remove();
  if(html){const root=document.createElement('div');root.id='modal-root';root.innerHTML=html;document.body.appendChild(root);if(state.modal==='writing')setTimeout(initCanvas,0)}
  const oldToast=document.querySelector('.toast');if(oldToast)oldToast.remove();
@@ -269,7 +288,9 @@ function initCanvas(){
 }
 
 function handleAction(a,el){
- const routes={home:'home',existing:'existing',communicate:'communicate',dashboard:'dashboard','open-menu':'menu'};if(routes[a]){state.screen=routes[a];state.modal=null;render();return}
+ const routes={home:'home',existing:'existing',communicate:'communicate',dashboard:'dashboard'};if(routes[a]){state.screen=routes[a];state.modal=null;render();return}
+ if(a==='open-menu'){state.orderEntry='barista';state.screen='menu';state.modal=null;render();return}
+ if(a==='scan-order'){state.orderEntry='scan';state.screen='menu';state.modal=null;state.toast='已打开点单码菜单，顾客可选择饮品下单';render();return}
  if(a==='reset'){Object.assign(state,{screen:'home',modal:null,selected:null,freeText:'',parseError:'',activeOrder:null});render()}
  if(a==='demo-import')addDemoOrder();
  if(a==='manual-import'){state.modal='manual';render()}
@@ -281,7 +302,8 @@ function handleAction(a,el){
  if(a==='open-sign'){state.modal='sign';state.signStage='choose';render()}
  if(a==='open-replies'){state.modal='replies';render()}
  if(a==='open-help'){state.modal='help';render()}
- if(a==='close-modal'){state.modal=null;render()}
+ if(a==='close-modal'){state.modal=null;state.productConfig=null;render()}
+ if(a==='confirm-product'){const note=document.querySelector('#product-note')?.value.trim()||'';state.productConfig.note=note;const c=state.productConfig;state.selected={...state.selected,spec:[c.temperature,c.temperature==='冷'?c.ice:null,c.sweetness,state.selected.category!=='饮品'?c.bean:null,c.milk,note].filter(Boolean).join(' · ')};state.productConfig=null;state.modal=null;state.screen='confirm';render()}
  if(a==='parse-order')parseOrder();
  if(a==='record')toggleRecord();
  if(a==='edit-input'){state.screen='communicate';state.inputKind='text';state.modal='input';render()}
@@ -300,7 +322,8 @@ function handleAction(a,el){
 
 document.addEventListener('click',e=>{
  const action=e.target.closest('[data-action]');if(action){handleAction(action.dataset.action,action);return}
- const p=e.target.closest('[data-product]');if(p){state.selected={...product(p.dataset.product)};state.screen='confirm';render();return}
+ const p=e.target.closest('[data-product]');if(p){const item=product(p.dataset.product),fixedCold=item.defaults.includes('冷')&&!item.defaults.some(x=>x.includes('/'));state.selected={...item};state.productConfig={temperature:fixedCold?'冷':'热',temperatureOptions:fixedCold?['冷']:['热','冷'],ice:'正常冰',sweetness:'正常甜',bean:item.id.startsWith('soe-')?'SOE 花魁':'焦糖坚果拼配',milk:item.defaults.includes('燕麦奶')?'燕麦奶 +5元':'鲜奶',note:''};state.modal='product-config';render();return}
+ const option=e.target.closest('[data-option-group]');if(option){state.productConfig[option.dataset.optionGroup]=option.dataset.optionValue;render();return}
  const cat=e.target.closest('[data-category]');if(cat){state.category=cat.dataset.category;render();return}
  const order=e.target.closest('[data-order]');if(order){state.activeOrder=order.dataset.order;const o=state.orders.find(x=>x.id===state.activeOrder);o.alert='';render();return}
  const status=e.target.closest('[data-status]');if(status&&status.dataset.status){const o=state.orders.find(x=>x.id===state.activeOrder);o.status=status.dataset.status;if(o.status==='ready')o.messages.push('系统：已向顾客显示取餐提醒');if(o.status==='done')state.activeOrder=null;state.toast=`订单已更新为${statusLabel[o.status]}`;render();return}
