@@ -1,6 +1,6 @@
 const app = document.querySelector('#app');
 const FC_API_ORIGIN = 'https://wemeet-demo-qixxweiimr.cn-shenzhen.fcapp.run';
-const apiUrl = path => location.hostname === 'jy2046.github.io' ? `${FC_API_ORIGIN}${path}` : path;
+const apiUrl = path => ['jy2046.github.io','wemeet.cogineai.com'].includes(location.hostname) ? `${FC_API_ORIGIN}${path}` : path;
 
 const menu = [
   {id:'blend-americano',name:'美式',price:16,emoji:'☕',category:'意式咖啡',series:'焦糖坚果拼配',desc:'巴西 · 哥伦比亚 · 乌干达｜奶油、焦糖、黑巧、坚果',defaults:['冷 / 热']},
